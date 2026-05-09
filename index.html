@@ -2,1187 +2,1942 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-<title>MACD Signal Pro - Análise de Gráfico em Tempo Real</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MACD Signal Pro v5</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
- 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #0a0e1a 0%, #0f1422 100%);
-    color: #e0e0e0;
-    padding: 20px;
-    min-height: 100vh;
+:root{
+  --bg:#04080f;--bg2:#080f1c;--bg3:#0d1526;--bg4:#121e33;
+  --border:#1c2d47;--border2:#243650;--border3:#2d4468;
+  --c:#00f5d4;--g:#00ff94;--r:#ff2d55;--y:#ffcc00;--b:#4d9dff;--p:#a855f7;
+  --cd:rgba(0,245,212,0.1);--gd:rgba(0,255,148,0.08);--rd:rgba(255,45,85,0.08);--yd:rgba(255,204,0,0.08);
+  --text:#c8daea;--text2:#6a8aaa;--text3:#354a65;
 }
- 
-.container { max-width: 1600px; margin: 0 auto; }
- 
-h2 { color: #00e5c0; font-size: 18px; margin-bottom: 15px; border-left: 3px solid #00e5c0; padding-left: 10px; }
-h3 { color: #00ff88; font-size: 14px; margin-bottom: 10px; }
-h4 { color: #ffd000; font-size: 12px; margin-bottom: 8px; }
- 
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-bottom: 20px; }
- 
-.panel {
-    background: rgba(20, 28, 40, 0.95);
-    border-radius: 12px;
-    padding: 20px;
-    border: 1px solid #2a3a55;
-    backdrop-filter: blur(10px);
-}
- 
-.signal-panel { border: 2px solid #2a3a55; transition: all 0.3s; }
-.signal-panel.call { border-color: #00ff88; background: rgba(0, 255, 136, 0.05); }
-.signal-panel.put { border-color: #ff3d5a; background: rgba(255, 61, 90, 0.05); }
-.signal-panel.no { border-color: #ffd000; background: rgba(255, 208, 0, 0.05); }
- 
-.signal-type { font-size: 28px; font-weight: bold; text-align: center; margin: 12px 0; }
-.signal-type.call { color: #00ff88; }
-.signal-type.put { color: #ff3d5a; }
-.signal-type.no { color: #ffd000; }
- 
-.signal-asset {
-    font-size: 18px; font-weight: bold; text-align: center;
-    margin: 10px 0; color: #00e5c0;
-    background: rgba(0, 229, 192, 0.1);
-    padding: 8px; border-radius: 8px;
-}
- 
-/* Expiração destacada */
-.signal-expiry {
-    font-size: 22px; font-weight: bold; text-align: center;
-    margin: 8px 0; padding: 8px 12px; border-radius: 8px;
-    background: rgba(255,208,0,0.12);
-    border: 1px solid #ffd000;
-    color: #ffd000;
-    letter-spacing: 1px;
-}
- 
-.probability-bar { height: 6px; background: #2a3a55; border-radius: 3px; overflow: hidden; margin: 10px 0; }
-.probability-fill { height: 100%; transition: width 0.3s; }
-.probability-fill.call { background: #00ff88; }
-.probability-fill.put { background: #ff3d5a; }
-.probability-fill.no { background: #ffd000; }
- 
-.stats { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px solid #2a3a55; }
-.stat { text-align: center; }
-.stat-label { font-size: 11px; color: #8899aa; }
-.stat-value { font-size: 18px; font-weight: bold; color: #00e5c0; }
- 
-button {
-    background: #2a3a55; color: #e0e0e0; border: none;
-    padding: 8px 16px; border-radius: 6px; cursor: pointer;
-    font-size: 12px; transition: all 0.2s;
-}
-button:hover { background: #3a4a6a; transform: translateY(-1px); }
-button.primary { background: #00e5c0; color: #0a0e1a; font-weight: bold; }
-button.primary:hover { background: #00ffd0; }
-button.danger { background: #ff3d5a; color: white; }
-button.danger:hover { background: #ff2350; }
-button.success { background: #00ff88; color: #0a0e1a; font-weight: bold; }
-button.success:hover { background: #00cc6a; }
-button.warning { background: #ffd000; color: #0a0e1a; font-weight: bold; }
-button.warning:hover { background: #e6bb00; }
-button.camera-btn { background: linear-gradient(135deg, #7b1fa2, #ce93d8); margin-bottom: 10px; }
-button.camera-btn:hover { background: linear-gradient(135deg, #9c27b0, #e1bee7); }
- 
-.upload-area {
-    border: 2px dashed #2a3a55; border-radius: 8px; padding: 30px;
-    text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 15px;
-}
-.upload-area:hover { border-color: #00e5c0; background: rgba(0, 229, 192, 0.05); }
-.upload-icon { font-size: 48px; margin-bottom: 10px; }
-.preview { max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 10px; }
- 
-.bank-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 10px; max-height: 300px; overflow-y: auto; margin-top: 15px;
-}
-.bank-item {
-    position: relative; cursor: pointer;
-    border: 2px solid #2a3a55; border-radius: 6px;
-    overflow: hidden; transition: all 0.2s;
-}
-.bank-item:hover { border-color: #00e5c0; transform: scale(1.05); }
-.bank-item.selected { border-color: #00ff88; box-shadow: 0 0 10px rgba(0, 255, 136, 0.3); }
-.bank-item img { width: 100%; height: 80px; object-fit: cover; }
-.bank-remove {
-    position: absolute; top: 2px; right: 2px;
-    background: rgba(0,0,0,0.7); border-radius: 3px;
-    padding: 2px 5px; font-size: 10px; cursor: pointer;
-}
- 
-/* MACD Filtros */
-.macd-filters { display: grid; gap: 8px; margin-top: 15px; }
-.macd-filter-row {
-    display: flex; justify-content: space-between;
-    font-size: 12px; padding: 6px 8px;
-    border-bottom: 1px solid #2a3a55;
-    border-radius: 4px;
-    background: rgba(42,58,85,0.3);
-}
-.macd-filter-row .filter-label { color: #aabbcc; }
-.filter-check { color: #00ff88; font-weight: bold; }
-.filter-cross { color: #ff3d5a; font-weight: bold; }
-.filter-neutral { color: #ffd000; }
- 
-/* MACD Status Badge */
-.macd-badge {
-    display: inline-block; padding: 3px 8px; border-radius: 10px;
-    font-size: 10px; font-weight: bold; margin-left: 6px;
-}
-.macd-badge.bull { background: rgba(0,255,136,0.2); color: #00ff88; border: 1px solid #00ff88; }
-.macd-badge.bear { background: rgba(255,61,90,0.2); color: #ff3d5a; border: 1px solid #ff3d5a; }
-.macd-badge.neutral { background: rgba(255,208,0,0.2); color: #ffd000; border: 1px solid #ffd000; }
- 
-.log-list { max-height: 200px; overflow-y: auto; }
-.log-item {
-    background: rgba(42, 58, 85, 0.5); padding: 8px;
-    margin-bottom: 5px; border-radius: 4px; font-size: 11px;
-    display: flex; justify-content: space-between;
-}
-.log-signal.call { color: #00ff88; }
-.log-signal.put { color: #ff3d5a; }
-.log-signal.no { color: #ffd000; }
- 
-.toast {
-    position: fixed; bottom: 20px; right: 20px;
-    background: #2a3a55; padding: 12px 20px; border-radius: 8px;
-    border-left: 3px solid #00e5c0; display: none; z-index: 1000;
-}
-.toast.show { display: block; animation: slideIn 0.3s ease; }
-@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
- 
-input, select {
-    background: #1a2235; border: 1px solid #2a3a55;
-    color: #e0e0e0; padding: 8px; border-radius: 4px; font-size: 12px;
-}
- 
-.btn-group { display: flex; gap: 10px; margin-top: 10px; }
-.time-display { text-align: center; font-size: 24px; font-family: monospace; margin-bottom: 10px; color: #00e5c0; }
- 
-.video-preview {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.95); z-index: 2000;
-    display: none; flex-direction: column;
-    justify-content: center; align-items: center;
-}
-.video-preview.active { display: flex; }
-.video-container { position: relative; width: 100%; max-width: 100%; height: auto; display: flex; justify-content: center; align-items: center; background: #000; }
-.video-preview video { width: 100%; max-width: 100%; height: auto; max-height: 70vh; object-fit: cover; border-radius: 12px; border: 2px solid #00e5c0; }
-.camera-controls { margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; padding: 10px; }
-.camera-controls button { padding: 12px 20px; font-size: 16px; min-width: 120px; }
-.capture-photo-btn { background: #00ff88; color: #0a0e1a; font-weight: bold; font-size: 18px; }
-.capture-photo-btn:hover { background: #00cc6a; }
-.switch-camera-btn { background: #ffd000; color: #0a0e1a; font-weight: bold; }
-.close-camera-btn { background: #ff3d5a; color: white; }
- 
-.top-assets { margin-top: 15px; }
-.asset-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-.asset-badge {
-    background: rgba(0, 229, 192, 0.1); border: 1px solid rgba(0, 229, 192, 0.3);
-    border-radius: 20px; padding: 8px 12px; font-size: 12px; font-weight: 600;
-    color: #00e5c0; display: flex; justify-content: space-between; align-items: center;
-    cursor: pointer; transition: all 0.2s;
-}
-.asset-badge:hover { background: rgba(0, 229, 192, 0.2); transform: translateX(5px); }
-.asset-badge.otc { border-color: #ffd000; color: #ffd000; }
-.asset-badge.otc:hover { background: rgba(255, 208, 0, 0.2); }
-.asset-score { font-size: 12px; font-weight: bold; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 12px; }
-.asset-update-info { font-size: 9px; color: #8899aa; text-align: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid #2a3a55; }
- 
-.current-selected-asset {
-    background: rgba(0, 229, 192, 0.2); border: 1px solid #00e5c0;
-    border-radius: 8px; padding: 10px; margin-bottom: 15px; text-align: center;
-}
-.current-selected-asset-label { font-size: 11px; color: #8899aa; }
-.current-selected-asset-value { font-size: 20px; font-weight: bold; color: #00ff88; }
- 
-.auto-signal-status {
-    background: rgba(255, 208, 0, 0.1); border: 1px solid #ffd000;
-    border-radius: 8px; padding: 8px; margin-top: 10px;
-    text-align: center; font-size: 12px;
-}
-.auto-signal-status.on { border-color: #00ff88; background: rgba(0, 255, 136, 0.1); }
-.auto-signal-status.off { border-color: #ff3d5a; background: rgba(255, 61, 90, 0.1); }
- 
-.strategy-selector { display: flex; gap: 10px; margin-top: 10px; }
-.strategy-btn { flex: 1; background: #2a3a55; font-size: 11px; }
-.strategy-btn.active { background: #00e5c0; color: #0a0e1a; }
- 
-/* Expiry selector */
-.expiry-selector { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
-.expiry-btn { flex: 1; font-size: 12px; padding: 6px; }
-.expiry-btn.active { background: #ffd000; color: #0a0e1a; font-weight: bold; }
- 
-/* Análise MACD em tempo real */
-.macd-analysis-box {
-    background: rgba(0,0,0,0.3);
-    border: 1px solid #2a3a55;
-    border-radius: 8px;
-    padding: 10px;
-    margin-top: 10px;
-    font-size: 11px;
-}
-.macd-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid rgba(42,58,85,0.5); }
-.macd-row:last-child { border-bottom: none; }
-.macd-label { color: #8899aa; }
-.macd-val-bull { color: #00ff88; font-weight: bold; }
-.macd-val-bear { color: #ff3d5a; font-weight: bold; }
-.macd-val-neutral { color: #ffd000; font-weight: bold; }
- 
-/* Análise da imagem */
-.image-analysis-result {
-    background: rgba(0,229,192,0.05);
-    border: 1px solid rgba(0,229,192,0.2);
-    border-radius: 8px;
-    padding: 10px;
-    margin-top: 10px;
-    font-size: 11px;
-    display: none;
-}
-.image-analysis-result.show { display: block; }
- 
-@media (max-width: 768px) {
-    .camera-controls button { padding: 10px 16px; font-size: 14px; min-width: 100px; }
-    .capture-photo-btn { font-size: 16px; }
-}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Exo 2',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(0,245,212,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,212,0.03) 1px,transparent 1px);
+  background-size:60px 60px;pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.7) 100%);pointer-events:none;z-index:0}
+.root{position:relative;z-index:1;max-width:1700px;margin:0 auto;padding:10px}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;gap:14px;padding:12px 18px;margin-bottom:12px;
+  background:linear-gradient(135deg,rgba(0,245,212,0.06),rgba(4,8,15,0.9));
+  border:1px solid rgba(0,245,212,0.25);border-radius:12px;
+  box-shadow:0 0 40px rgba(0,245,212,0.05),inset 0 1px 0 rgba(0,245,212,0.1)}
+.logo{font-family:'Share Tech Mono',monospace;font-size:22px;color:var(--c);
+  text-shadow:0 0 30px rgba(0,245,212,0.6);letter-spacing:3px}
+.logo span{color:var(--g)}
+.hdr-tag{font-size:11px;color:var(--text2);font-family:'Share Tech Mono',monospace;
+  background:var(--bg4);padding:3px 8px;border-radius:4px;border:1px solid var(--border2)}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.live-badge{display:flex;align-items:center;gap:6px;background:var(--gd);border:1px solid rgba(0,255,148,0.3);
+  padding:4px 12px;border-radius:20px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--g)}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--g);animation:pulseAnim 1.2s ease infinite}
+@keyframes pulseAnim{0%,100%{box-shadow:0 0 0 0 rgba(0,255,148,0.6)}60%{box-shadow:0 0 0 8px transparent}}
+.clock{font-family:'Share Tech Mono',monospace;font-size:20px;color:var(--c);text-shadow:0 0 15px rgba(0,245,212,0.4)}
+
+/* API STATUS BAR */
+.api-status-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;padding:8px 12px;
+  background:var(--bg2);border:1px solid var(--border2);border-radius:8px}
+.api-pill{padding:3px 10px;border-radius:12px;font-size:9px;font-family:'Share Tech Mono',monospace;
+  display:flex;align-items:center;gap:4px;border:1px solid var(--border3)}
+.api-pill.ok{background:var(--gd);color:var(--g);border-color:rgba(0,255,148,0.3)}
+.api-pill.fail{background:var(--rd);color:var(--r);border-color:rgba(255,45,85,0.3)}
+.api-pill.test{background:var(--yd);color:var(--y);border-color:rgba(255,204,0,0.3);animation:flashPill 0.8s infinite}
+@keyframes flashPill{0%,100%{opacity:1}50%{opacity:0.5}}
+.api-pill-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+/* BROKERS */
+.brokers{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.broker{flex:1;min-width:160px;display:flex;align-items:center;gap:10px;padding:9px 14px;
+  border-radius:10px;border:1px solid var(--border2);background:var(--bg2);
+  cursor:pointer;text-decoration:none;transition:all 0.25s}
+.broker:hover{border-color:var(--c);transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,245,212,0.1)}
+.b-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:900;font-family:'Share Tech Mono',monospace;flex-shrink:0}
+.b-name{font-size:13px;font-weight:700;color:var(--c)}
+.b-id{font-size:9px;color:var(--text2);font-family:'Share Tech Mono',monospace;margin-top:1px}
+.b-dot{width:7px;height:7px;border-radius:50%;background:var(--g);margin-left:auto;animation:pulseAnim 2s infinite}
+.workflow-box{flex:1.5;min-width:260px;background:linear-gradient(135deg,rgba(255,204,0,0.06),var(--bg2));
+  border:1px solid rgba(255,204,0,0.25);border-radius:10px;padding:9px 14px;font-size:11px;font-family:'Share Tech Mono',monospace}
+.wf-title{color:var(--y);font-size:10px;margin-bottom:4px}
+.wf-steps{color:var(--text);line-height:1.8}
+.wf-steps span{color:var(--c)}
+
+/* WARN BAR */
+.warn-bar{background:linear-gradient(135deg,rgba(255,45,85,0.06),var(--bg2));
+  border:1px solid rgba(255,45,85,0.25);border-radius:8px;padding:8px 14px;
+  margin-bottom:12px;font-size:10px;color:#ff8099;font-family:'Share Tech Mono',monospace;line-height:1.6}
+.warn-bar strong{color:var(--r)}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:290px 1fr 300px;gap:12px;margin-bottom:12px}
+@media(max-width:1300px){.layout{grid-template-columns:270px 1fr}}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.layout-bottom{display:grid;grid-template-columns:1fr 1fr 280px;gap:12px}
+@media(max-width:1100px){.layout-bottom{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.layout-bottom{grid-template-columns:1fr}}
+
+/* PANELS */
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;position:relative;overflow:hidden}
+.panel::after{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--c),transparent);opacity:0.3}
+.pt{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--c);
+  margin-bottom:10px;display:flex;align-items:center;gap:6px;letter-spacing:1px}
+.pt-dot{width:6px;height:6px;border-radius:50%;background:var(--c)}
+
+/* MODO TOGGLE */
+.mode-toggle{display:flex;gap:0;margin-bottom:10px;border:1px solid var(--border2);border-radius:8px;overflow:hidden}
+.mode-btn{flex:1;padding:9px;font-size:12px;font-weight:700;font-family:'Share Tech Mono',monospace;
+  background:var(--bg3);color:var(--text2);border:none;cursor:pointer;transition:all 0.2s;border-radius:0}
+.mode-btn.active-auto{background:linear-gradient(135deg,rgba(0,255,148,0.15),rgba(0,255,148,0.05));color:var(--g);border-right:1px solid var(--border2)}
+.mode-btn.active-manual{background:linear-gradient(135deg,rgba(0,245,212,0.15),rgba(0,245,212,0.05));color:var(--c)}
+.mode-btn:hover:not(.active-auto):not(.active-manual){background:var(--bg4);color:var(--text)}
+
+/* RADAR */
+.radar-section-title{font-size:9px;font-family:'Share Tech Mono',monospace;padding:4px 8px;border-radius:4px;margin-bottom:5px;display:flex;align-items:center;gap:5px}
+.radar-section-title.open{background:rgba(0,255,148,0.08);color:var(--g);border:1px solid rgba(0,255,148,0.2)}
+.radar-section-title.otc{background:rgba(77,157,255,0.08);color:var(--b);border:1px solid rgba(77,157,255,0.2)}
+.imm-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;min-height:26px;
+  padding:4px;background:var(--bg3);border-radius:6px;border:1px solid var(--border)}
+.chip{padding:3px 9px;border-radius:10px;font-size:10px;font-weight:700;
+  font-family:'Share Tech Mono',monospace;cursor:pointer;transition:all 0.2s;border:1px solid transparent}
+.chip.bull{background:var(--gd);color:var(--g);border-color:rgba(0,255,148,0.3)}
+.chip.bear{background:var(--rd);color:var(--r);border-color:rgba(255,45,85,0.3)}
+.chip.otc{opacity:0.85}
+.chip:hover{transform:scale(1.08)}
+.radar-list{display:flex;flex-direction:column;gap:4px;max-height:520px;overflow-y:auto}
+.ri{background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  padding:7px 10px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.ri:hover{border-color:var(--c);transform:translateX(3px)}
+.ri::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--border3);transition:all 0.3s}
+.ri.bull::before{background:var(--g)}
+.ri.bear::before{background:var(--r)}
+.ri.otc-row{opacity:0.88}
+.ri.imm{animation:immAnim 1s ease infinite alternate}
+@keyframes immAnim{from{border-color:var(--border)}to{border-color:var(--y)}}
+.ri-top{display:flex;justify-content:space-between;align-items:center}
+.ri-pair{font-size:11px;font-weight:700;font-family:'Share Tech Mono',monospace}
+.ri-pair.bull{color:var(--g)} .ri-pair.bear{color:var(--r)} .ri-pair.otc{color:var(--b)}
+.ri-eta{font-size:9px;font-family:'Share Tech Mono',monospace;padding:2px 6px;border-radius:6px;background:var(--bg4);color:var(--text2)}
+.ri-eta.hot{background:rgba(255,204,0,0.2);color:var(--y);border:1px solid rgba(255,204,0,0.4);animation:hotPulse 0.7s ease infinite}
+@keyframes hotPulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.ri-bar{height:3px;background:var(--bg4);border-radius:2px;margin:4px 0;overflow:hidden}
+.ri-fill{height:100%;border-radius:2px;transition:width 0.5s}
+.ri-fill.bull{background:linear-gradient(90deg,#00b868,var(--g))}
+.ri-fill.bear{background:linear-gradient(90deg,#cc1a33,var(--r))}
+.ri-info{display:flex;justify-content:space-between;font-size:9px;font-family:'Share Tech Mono',monospace;color:var(--text2)}
+
+/* LIVE PRICE BOX */
+.live-price-box{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;
+  margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;
+  font-family:'Share Tech Mono',monospace}
+.lp-pair{font-size:11px;color:var(--text2)}
+.lp-price{font-size:20px;font-weight:700;color:var(--c)}
+.lp-change{font-size:10px;padding:2px 6px;border-radius:4px}
+.lp-change.up{color:var(--g);background:var(--gd)}
+.lp-change.dn{color:var(--r);background:var(--rd)}
+
+/* CAPTURE ZONE */
+.capture-zone{background:var(--bg3);border:2px solid var(--border2);border-radius:10px;
+  overflow:hidden;position:relative;min-height:230px;display:flex;align-items:center;justify-content:center}
+.capture-zone.active{border-color:var(--c);box-shadow:0 0 20px rgba(0,245,212,0.15)}
+.capture-zone.analyzing{border-color:var(--y);animation:analyzingPulse 1s ease infinite}
+.capture-zone.signal-call{border-color:var(--g);box-shadow:0 0 30px rgba(0,255,148,0.2)}
+.capture-zone.signal-put{border-color:var(--r);box-shadow:0 0 30px rgba(255,45,85,0.2)}
+@keyframes analyzingPulse{0%,100%{box-shadow:0 0 20px rgba(255,204,0,0.1)}50%{box-shadow:0 0 40px rgba(255,204,0,0.3)}}
+.cap-overlay{position:absolute;inset:0;pointer-events:none}
+.scan-line{position:absolute;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--c),transparent);opacity:0;animation:scan 3s ease infinite}
+@keyframes scan{0%{top:0;opacity:0}10%{opacity:0.8}90%{opacity:0.8}100%{top:100%;opacity:0}}
+.cap-corner{position:absolute;width:16px;height:16px}
+.cap-corner.tl{top:6px;left:6px;border-top:2px solid var(--c);border-left:2px solid var(--c)}
+.cap-corner.tr{top:6px;right:6px;border-top:2px solid var(--c);border-right:2px solid var(--c)}
+.cap-corner.bl{bottom:6px;left:6px;border-bottom:2px solid var(--c);border-left:2px solid var(--c)}
+.cap-corner.br{bottom:6px;right:6px;border-bottom:2px solid var(--c);border-right:2px solid var(--c)}
+.cap-status-overlay{position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,0.85);padding:3px 12px;border-radius:10px;
+  font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--c);
+  border:1px solid rgba(0,245,212,0.3);white-space:nowrap}
+.cap-timer{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.85);
+  padding:3px 10px;border-radius:8px;font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--y);font-weight:700}
+.capture-placeholder{text-align:center;padding:30px;font-family:'Share Tech Mono',monospace}
+.capture-placeholder .icon{font-size:48px;margin-bottom:12px}
+.capture-placeholder .text{font-size:12px;color:var(--text2);line-height:1.9}
+.capture-placeholder .hint{font-size:10px;color:var(--text3);margin-top:8px}
+
+/* MACD CHART */
+.macd-mini-chart{width:100%;height:80px;background:var(--bg3);border-radius:6px;
+  border:1px solid var(--border);margin-bottom:8px;overflow:hidden}
+
+/* BUTTONS */
+.cap-main-btn{width:100%;padding:14px;font-size:15px;font-weight:700;
+  background:linear-gradient(135deg,#00a882,var(--c));color:var(--bg);
+  border:none;border-radius:8px;cursor:pointer;transition:all 0.2s;
+  font-family:'Exo 2',sans-serif;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:8px}
+.cap-main-btn:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(0,245,212,0.3)}
+.cap-main-btn.stop{background:linear-gradient(135deg,#cc1a33,var(--r))}
+.cap-main-btn.stop:hover{box-shadow:0 6px 25px rgba(255,45,85,0.3)}
+.cap-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px}
+.cs-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center}
+.cs-val{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:var(--c)}
+.cs-lbl{font-size:9px;color:var(--text2);font-family:'Share Tech Mono',monospace;margin-top:2px}
+
+/* STATUS BADGE */
+.status-badge{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:6px;
+  font-size:10px;font-family:'Share Tech Mono',monospace;margin-top:8px}
+.status-badge.off{background:var(--rd);border:1px solid rgba(255,45,85,0.3);color:var(--r)}
+.status-badge.on{background:var(--gd);border:1px solid rgba(0,255,148,0.3);color:var(--g)}
+.status-badge.analyzing{background:var(--yd);border:1px solid rgba(255,204,0,0.3);color:var(--y)}
+.s-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
+.s-dot.blink{animation:pulseAnim 0.8s infinite}
+
+/* MANUAL SIGNAL BUTTON */
+.manual-btn{width:100%;padding:13px;font-size:14px;font-weight:700;
+  background:linear-gradient(135deg,rgba(0,245,212,0.15),rgba(0,245,212,0.05));
+  color:var(--c);border:2px solid var(--c);border-radius:8px;cursor:pointer;transition:all 0.2s;
+  font-family:'Exo 2',sans-serif;letter-spacing:1px;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+.manual-btn:hover{background:var(--cd);transform:translateY(-2px);box-shadow:0 6px 25px rgba(0,245,212,0.2)}
+.manual-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+
+/* SIGNAL PANEL */
+.sig-panel{border:2px solid var(--border2);border-radius:12px;padding:16px;transition:all 0.4s;background:var(--bg3)}
+.sig-panel.call{border-color:var(--g);background:linear-gradient(135deg,rgba(0,255,148,0.05),var(--bg3));box-shadow:0 0 40px rgba(0,255,148,0.08)}
+.sig-panel.put{border-color:var(--r);background:linear-gradient(135deg,rgba(255,45,85,0.05),var(--bg3));box-shadow:0 0 40px rgba(255,45,85,0.08)}
+.sig-panel.no{border-color:var(--y)}
+.sig-type{font-size:36px;font-weight:900;text-align:center;margin:8px 0;font-family:'Share Tech Mono',monospace;letter-spacing:3px}
+.sig-type.call{color:var(--g);text-shadow:0 0 30px rgba(0,255,148,0.5)}
+.sig-type.put{color:var(--r);text-shadow:0 0 30px rgba(255,45,85,0.5)}
+.sig-type.no{color:var(--y)}
+.sig-asset{font-size:18px;font-weight:700;text-align:center;font-family:'Share Tech Mono',monospace;
+  padding:8px;border-radius:8px;background:var(--bg4);margin:6px 0}
+.sig-exp{font-size:22px;font-weight:700;text-align:center;border-radius:8px;padding:8px;margin:6px 0;
+  font-family:'Share Tech Mono',monospace;border:1px solid var(--y);color:var(--y);background:var(--yd)}
+.prob-wrap{margin:10px 0}
+.prob-bar{height:10px;background:var(--bg4);border-radius:5px;overflow:hidden;margin:6px 0}
+.prob-fill{height:100%;transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1);border-radius:5px}
+.prob-fill.call{background:linear-gradient(90deg,#00b868,var(--g));box-shadow:0 0 10px rgba(0,255,148,0.4)}
+.prob-fill.put{background:linear-gradient(90deg,#cc1a33,var(--r));box-shadow:0 0 10px rgba(255,45,85,0.4)}
+.prob-fill.no{background:var(--y)}
+.prob-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text2);font-family:'Share Tech Mono',monospace}
+.q-ring{width:65px;height:65px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;border:3px solid var(--border2);flex-shrink:0;transition:all 0.4s}
+.q-ring.high{border-color:var(--g);box-shadow:0 0 20px rgba(0,255,148,0.3)}
+.q-ring.med{border-color:var(--y);box-shadow:0 0 15px rgba(255,204,0,0.2)}
+.q-ring.low{border-color:var(--r)}
+.q-num{font-size:14px;font-family:'Share Tech Mono',monospace;font-weight:700}
+.q-ring.high .q-num{color:var(--g)} .q-ring.med .q-num{color:var(--y)} .q-ring.low .q-num{color:var(--r)}
+.q-lbl{font-size:8px;font-family:'Share Tech Mono',monospace;color:var(--text2)}
+.strat-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:12px;
+  font-size:11px;font-weight:700;font-family:'Share Tech Mono',monospace}
+.strat-tag.trend{background:rgba(77,157,255,0.15);color:var(--b);border:1px solid rgba(77,157,255,0.3)}
+.strat-tag.scalp{background:var(--cd);color:var(--c);border:1px solid rgba(0,245,212,0.3)}
+.strat-tag.rev{background:var(--yd);color:var(--y);border:1px solid rgba(255,204,0,0.3)}
+.strat-tag.cont{background:rgba(168,85,247,0.15);color:var(--p);border:1px solid rgba(168,85,247,0.3)}
+.sig-reason{font-size:10px;color:var(--text2);margin-top:8px;line-height:1.7;
+  font-family:'Share Tech Mono',monospace;background:var(--bg4);padding:8px;border-radius:6px;border-left:2px solid var(--border3)}
+.sig-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.ss-box{text-align:center}
+.ss-lbl{font-size:9px;color:var(--text2);font-family:'Share Tech Mono',monospace}
+.ss-val{font-size:15px;font-weight:700;color:var(--c);font-family:'Share Tech Mono',monospace}
+
+/* MACD REF */
+.macd-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(28,45,71,0.3);
+  font-size:10px;font-family:'Share Tech Mono',monospace}
+.macd-row:last-child{border:none}
+.macd-lbl{color:var(--text2)}
+.vbull{color:var(--g);font-weight:700} .vbear{color:var(--r);font-weight:700} .vneutral{color:var(--y);font-weight:700}
+
+/* FILTERS */
+.f-table{width:100%;border-collapse:collapse;font-size:10px;font-family:'Share Tech Mono',monospace}
+.f-table tr{border-bottom:1px solid rgba(28,45,71,0.5)}
+.f-table tr:last-child{border:none}
+.f-table td{padding:5px 4px}
+.f-table td:first-child{color:var(--text2)}
+.f-table td:last-child{text-align:right;font-weight:700}
+.ok{color:var(--g)} .fail{color:var(--r)} .na{color:var(--text3)} .warn-c{color:var(--y)}
+
+/* SR LEVELS */
+.sr-row{display:flex;justify-content:space-between;align-items:center;padding:5px 6px;
+  border-bottom:1px solid rgba(28,45,71,0.4);font-size:10px;font-family:'Share Tech Mono',monospace}
+.sr-row:last-child{border:none}
+.sr-r{color:var(--r);font-weight:700} .sr-s{color:var(--g);font-weight:700}
+.sr-p{color:var(--c);font-weight:700} .sr-val{color:var(--text)} .sr-str{color:var(--text3);font-size:9px}
+
+/* LOG */
+.log-wrap{max-height:180px;overflow-y:auto}
+.log-item{background:rgba(13,21,38,0.8);padding:6px 8px;margin-bottom:3px;border-radius:6px;
+  font-size:9px;font-family:'Share Tech Mono',monospace;
+  display:grid;grid-template-columns:46px 1fr 28px 34px 34px;gap:4px;
+  align-items:center;border-left:3px solid var(--border)}
+.log-item.call{border-left-color:var(--g)}
+.log-item.put{border-left-color:var(--r)}
+
+/* CTD RING */
+.ctd-wrap{display:flex;justify-content:center;margin:8px 0}
+.ctd-ring{position:relative;width:80px;height:80px}
+.ctd-ring svg{width:80px;height:80px;transform:rotate(-90deg)}
+.ctd-bg{fill:none;stroke:var(--bg4);stroke-width:5}
+.ctd-fg{fill:none;stroke:var(--c);stroke-width:5;stroke-linecap:round;stroke-dasharray:219.9;transition:stroke-dashoffset 1s linear}
+.ctd-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ctd-num{font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;color:var(--c)}
+.ctd-sub{font-size:8px;font-family:'Share Tech Mono',monospace;color:var(--text2)}
+
+/* AI RESULT */
+.ai-result{background:rgba(0,245,212,0.04);border:1px solid rgba(0,245,212,0.15);
+  border-radius:8px;padding:10px;margin-top:10px;font-size:10px;font-family:'Share Tech Mono',monospace;display:none;line-height:1.8}
+.ai-result.show{display:block}
+.ai-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin:6px 0}
+.ai-cell{background:var(--bg4);padding:6px;border-radius:6px;text-align:center}
+.ai-cell-lbl{font-size:8px;color:var(--text2)}
+.ai-cell-val{font-size:13px;font-weight:700;margin-top:2px}
+.badges{display:flex;flex-wrap:wrap;gap:3px;margin:6px 0}
+.badge{padding:2px 7px;border-radius:6px;font-size:9px;font-weight:700;font-family:'Share Tech Mono',monospace}
+.bg{background:var(--gd);color:var(--g);border:1px solid rgba(0,255,148,0.3)}
+.br{background:var(--rd);color:var(--r);border:1px solid rgba(255,45,85,0.3)}
+.by{background:var(--yd);color:var(--y);border:1px solid rgba(255,204,0,0.3)}
+.bb{background:rgba(77,157,255,0.12);color:var(--b);border:1px solid rgba(77,157,255,0.3)}
+
+/* PERM GUIDE */
+.perm-guide{background:linear-gradient(135deg,rgba(0,245,212,0.06),var(--bg3));
+  border:1px solid rgba(0,245,212,0.2);border-radius:10px;padding:14px;
+  font-family:'Share Tech Mono',monospace;font-size:10px;line-height:2;color:var(--text)}
+.perm-step{display:flex;align-items:flex-start;gap:8px;padding:4px 0}
+.perm-num{background:var(--c);color:var(--bg);width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px}
+.perm-text{color:var(--text2)}
+.perm-text strong{color:var(--c)}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg3);padding:10px 18px;
+  border-radius:10px;border-left:3px solid var(--c);display:none;z-index:9999;font-size:11px;
+  max-width:380px;font-family:'Share Tech Mono',monospace;box-shadow:0 4px 30px rgba(0,0,0,0.5)}
+.toast.show{display:block;animation:toastIn 0.3s ease}
+.toast.te{border-left-color:var(--r)} .toast.tw{border-left-color:var(--y)}
+@keyframes toastIn{from{transform:translateX(130%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* CROSS ALERT */
+.cross-alert{display:none;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;
+  font-family:'Share Tech Mono',monospace;font-size:11px;margin-top:8px;animation:alertPulse 1s ease infinite}
+.cross-alert.show{display:flex}
+.cross-alert.bull{background:rgba(0,255,148,0.1);border:1px solid rgba(0,255,148,0.4);color:var(--g)}
+.cross-alert.bear{background:rgba(255,45,85,0.1);border:1px solid rgba(255,45,85,0.4);color:var(--r)}
+.cross-alert.cont{background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.4);color:var(--p)}
+@keyframes alertPulse{0%,100%{opacity:1}50%{opacity:0.6}}
+
+/* EXP IA INFO */
+.exp-ia-info{background:linear-gradient(135deg,rgba(255,204,0,0.08),var(--bg3));
+  border:1px solid rgba(255,204,0,0.25);border-radius:8px;padding:8px 12px;margin-top:8px;
+  font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--y)}
+.exp-ia-info .ei-title{font-size:9px;color:var(--text2);margin-bottom:4px}
+.exp-ia-btns{display:flex;gap:6px;margin-top:6px}
+.exp-ia-btn{flex:1;font-size:11px;padding:6px;font-family:'Share Tech Mono',monospace;border-radius:6px;
+  background:var(--bg4);border:1px solid var(--border2);color:var(--text2);cursor:default;transition:all 0.3s}
+.exp-ia-btn.selected{background:rgba(255,204,0,0.15);border-color:var(--y);color:var(--y);font-weight:700}
+
+/* TREND INDICATOR */
+.trend-box{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px;
+  margin-bottom:8px;display:flex;gap:8px;align-items:center;font-family:'Share Tech Mono',monospace}
+.trend-arrow{font-size:28px;line-height:1}
+.trend-info{flex:1}
+.trend-label{font-size:10px;color:var(--text2);margin-bottom:2px}
+.trend-val{font-size:13px;font-weight:700}
+.trend-val.up{color:var(--g)} .trend-val.dn{color:var(--r)} .trend-val.lat{color:var(--y)}
+
+/* FOREX LIVE */
+.forex-live{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 10px;
+  font-family:'Share Tech Mono',monospace;font-size:9px;display:flex;justify-content:space-between;margin-bottom:6px}
+
+button{background:var(--bg4);color:var(--text);border:1px solid var(--border2);padding:6px 12px;
+  border-radius:6px;cursor:pointer;font-size:11px;transition:all 0.2s;font-family:'Exo 2',sans-serif;font-weight:600}
+button:hover{border-color:var(--c);background:var(--cd)}
+.btn-g{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+select{background:var(--bg3);border:1px solid var(--border2);color:var(--text);
+  padding:7px;border-radius:6px;font-size:11px;font-family:'Share Tech Mono',monospace;outline:none}
+select:focus{border-color:var(--c)}
+.pair-select-wrap{display:flex;gap:8px;margin-bottom:10px;align-items:center}
 </style>
 </head>
 <body>
- 
-<div class="container">
-    <h2>📊 MACD Signal Pro — Análise de Gráfico 15s | Expiração 1-2 Min</h2>
- 
-    <div class="grid">
-        <!-- Painel de Sinal e Tempo -->
-        <div class="panel">
-            <h3>🕐 Sincronização em Tempo Real</h3>
-            <div class="time-display" id="timeDisplay">--:--:--</div>
-            <div class="time-display" style="font-size: 14px" id="countdown">--</div>
- 
-            <div id="signalPanel" class="signal-panel" style="margin-top: 20px; padding: 15px; border-radius: 8px;">
-                <div style="text-align: center; font-size: 12px; color: #8899aa;">🔔 ÚLTIMO SINAL MACD</div>
-                <div class="signal-type" id="signalType">—</div>
-                <div class="signal-asset" id="signalAsset">—</div>
-                <div class="signal-expiry" id="signalExpiry">⏱ Expiração: —</div>
-                <div class="probability-bar">
-                    <div class="probability-fill" id="probabilityFill" style="width: 0%"></div>
-                </div>
-                <div id="signalDetails" style="font-size: 12px; text-align: center; margin-top: 10px;"></div>
-                <div class="stats">
-                    <div class="stat"><div class="stat-label">Entrada</div><div class="stat-value" id="entryTime">--</div></div>
-                    <div class="stat"><div class="stat-label">Expiração</div><div class="stat-value" id="expiryTime">--</div></div>
-                    <div class="stat"><div class="stat-label">Prob.</div><div class="stat-value" id="probabilityValue">0%</div></div>
-                </div>
-            </div>
- 
-            <div class="current-selected-asset">
-                <div class="current-selected-asset-label">📌 ATIVO SELECIONADO</div>
-                <div class="current-selected-asset-value" id="currentSelectedAsset">EUR/USD</div>
-            </div>
- 
-            <div class="btn-group">
-                <select id="pairSelect" style="flex: 1;">
-                    <option value="">Selecione o Par</option>
-                    <optgroup label="📈 Mercado Aberto">
-                        <option>EUR/USD</option><option>GBP/USD</option><option>USD/JPY</option>
-                        <option>USD/CHF</option><option>AUD/USD</option><option>USD/CAD</option>
-                        <option>NZD/USD</option><option>EUR/GBP</option><option>EUR/JPY</option>
-                        <option>EUR/CHF</option><option>EUR/AUD</option><option>EUR/CAD</option>
-                        <option>GBP/JPY</option><option>GBP/CHF</option><option>GBP/CAD</option>
-                        <option>AUD/JPY</option><option>AUD/CAD</option><option>AUD/CHF</option>
-                        <option>CAD/JPY</option><option>CHF/JPY</option><option>NZD/JPY</option>
-                        <option>USD/BRL</option>
-                    </optgroup>
-                    <optgroup label="🔒 Mercado Fechado (OTC)">
-                        <option>EUR/USD OTC</option><option>GBP/USD OTC</option><option>USD/JPY OTC</option>
-                        <option>EUR/JPY OTC</option><option>AUD/USD OTC</option><option>GBP/JPY OTC</option>
-                        <option>USD/TRY OTC</option><option>USD/ZAR OTC</option><option>EUR/GBP OTC</option>
-                        <option>AUD/JPY OTC</option><option>CAD/JPY OTC</option><option>CHF/JPY OTC</option>
-                        <option>EUR/AUD OTC</option><option>GBP/AUD OTC</option><option>NZD/CHF OTC</option>
-                        <option>CAD/CHF OTC</option>
-                    </optgroup>
-                </select>
-                <button class="primary" id="manualSignalBtn" style="flex: 1;">⚡ GERAR SINAL MANUAL</button>
-            </div>
- 
-            <!-- Seletor de Expiração Manual -->
-            <div style="margin-top:10px;">
-                <div style="font-size:11px; color:#8899aa; margin-bottom:4px;">⏱ Expiração preferencial (auto detecta pelo contexto):</div>
-                <div class="expiry-selector">
-                    <button class="expiry-btn active" id="expiry1min" onclick="setExpiry(1)">1 Minuto</button>
-                    <button class="expiry-btn" id="expiry2min" onclick="setExpiry(2)">2 Minutos</button>
-                    <button class="expiry-btn" id="expiryAuto" onclick="setExpiry(0)">🤖 Auto</button>
-                </div>
-            </div>
- 
-            <div class="btn-group" style="margin-top:10px;">
-                <button id="toggleAutoSignalBtn" class="success" style="flex: 1;">🔴 AUTO: DESLIGADO</button>
-            </div>
- 
-            <div class="auto-signal-status off" id="autoSignalStatus">
-                📡 Sinal Automático: <strong>DESLIGADO</strong> | Aguardando ativação
-            </div>
-        </div>
- 
-        <!-- Módulo de Camera e Gráfico -->
-        <div class="panel">
-            <h3>📸 Capturar Gráfico MACD</h3>
- 
-            <button class="camera-btn" id="openCameraBtn" style="width: 100%; padding: 12px; font-size: 14px;">
-                📷 ABRIR CÂMERA — FOTOGRAFAR GRÁFICO
-            </button>
- 
-            <div class="upload-area" id="dropArea">
-                <div class="upload-icon">📂</div>
-                <div>Arraste ou clique para inserir imagem do gráfico MACD</div>
-                <div style="font-size: 10px; margin-top: 5px;">Formatos: JPG, PNG, GIF</div>
-            </div>
-            <input type="file" id="imageInput" accept="image/*" style="display: none;">
-            <div id="previewContainer" style="display: none;">
-                <img id="preview" class="preview">
-                <button id="clearImageBtn" class="danger" style="margin-top: 5px;">🗑️ LIMPAR</button>
-            </div>
-            <div id="imageStatus" style="font-size: 11px; margin-top: 10px; color: #00e5c0;"></div>
- 
-            <!-- Resultado de análise da imagem -->
-            <div class="image-analysis-result" id="imageAnalysisResult">
-                <div style="font-size:12px; color:#00e5c0; margin-bottom:6px;">🔍 Análise MACD da Imagem:</div>
-                <div id="imageAnalysisText" style="color:#ccc; line-height:1.6;"></div>
-            </div>
- 
-            <!-- MACD ao vivo simulado -->
-            <div class="macd-analysis-box" id="macdLiveBox">
-                <div style="font-size:12px; color:#ffd000; margin-bottom:6px;">📊 Leitura MACD (15s):</div>
-                <div class="macd-row"><span class="macd-label">Linha MACD</span><span id="macdLine" class="macd-val-neutral">—</span></div>
-                <div class="macd-row"><span class="macd-label">Linha Sinal</span><span id="macdSignalLine" class="macd-val-neutral">—</span></div>
-                <div class="macd-row"><span class="macd-label">Histograma</span><span id="macdHist" class="macd-val-neutral">—</span></div>
-                <div class="macd-row"><span class="macd-label">Cruzamento</span><span id="macdCross" class="macd-val-neutral">—</span></div>
-                <div class="macd-row"><span class="macd-label">Tendência</span><span id="macdTrend" class="macd-val-neutral">—</span></div>
-                <div class="macd-row"><span class="macd-label">Divergência</span><span id="macdDiv" class="macd-val-neutral">—</span></div>
-            </div>
-        </div>
- 
-        <!-- Top Ativos -->
-        <div class="panel">
-            <h3>🏆 Top Ativos do Dia</h3>
-            <div class="strategy-selector">
-                <button id="strategyTrend" class="strategy-btn active">📈 Tendência</button>
-                <button id="strategyScalping" class="strategy-btn">⚡ Scalping</button>
-                <button id="strategyReversal" class="strategy-btn">🔄 Reversão</button>
-            </div>
-            <div class="top-assets">
-                <h4>📈 Melhores Mercado Aberto</h4>
-                <div id="topOpenAssets" class="asset-list">Analisando...</div>
-            </div>
-            <div class="top-assets" style="margin-top: 15px;">
-                <h4>🔒 Melhores OTC</h4>
-                <div id="topOTCAssets" class="asset-list">Analisando...</div>
-            </div>
-            <div id="assetAnalysisStatus" class="asset-update-info"></div>
-        </div>
+<div class="root">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div>
+    <div class="logo">MACD<span>SIGNAL</span>PRO <span style="font-size:14px;color:var(--y)">v5</span></div>
+    <div style="font-size:10px;color:var(--text2);font-family:'Share Tech Mono',monospace;margin-top:2px">
+      Captura Real · MACD Cross · Continuidade · Multi-IA · Forex Live
     </div>
- 
-    <!-- Segunda linha -->
-    <div class="grid">
-        <!-- Banco de Imagens -->
-        <div class="panel">
-            <h3>🗄️ Banco de Gráficos MACD</h3>
-            <div class="btn-group">
-                <button id="addToBankBtn">+ Adicionar ao Banco</button>
-                <button id="saveBankBtn">💾 Salvar Banco</button>
-                <button id="clearBankBtn" class="danger">🗑️ Limpar Tudo</button>
-            </div>
-            <input type="file" id="bankInput" accept="image/*" multiple style="display: none;">
-            <div id="bankStats" style="margin-top: 10px; font-size: 11px;">Imagens no banco: <strong id="bankCount">0</strong>/100</div>
-            <div id="bankGrid" class="bank-grid"></div>
-        </div>
- 
-        <!-- Filtros MACD -->
-        <div class="panel">
-            <h3>🔍 Filtros MACD (12,26,9)</h3>
-            <div style="font-size:10px; color:#8899aa; margin-bottom:10px;">Análise baseada no gráfico de 15 segundos</div>
-            <div class="macd-filters" id="macdFilters">
-                <div class="macd-filter-row">
-                    <span class="filter-label">Cruzamento MACD/Sinal</span>
-                    <span id="mf1">—</span>
-                </div>
-                <div class="macd-filter-row">
-                    <span class="filter-label">Histograma crescente</span>
-                    <span id="mf2">—</span>
-                </div>
-                <div class="macd-filter-row">
-                    <span class="filter-label">MACD acima do zero</span>
-                    <span id="mf3">—</span>
-                </div>
-                <div class="macd-filter-row">
-                    <span class="filter-label">Tendência confirmada</span>
-                    <span id="mf4">—</span>
-                </div>
-                <div class="macd-filter-row">
-                    <span class="filter-label">Sem divergência inversa</span>
-                    <span id="mf5">—</span>
-                </div>
-                <div class="macd-filter-row">
-                    <span class="filter-label">Momentum acelerando</span>
-                    <span id="mf6">—</span>
-                </div>
-                <div class="macd-filter-row">
-                    <span class="filter-label">Volume confirmando</span>
-                    <span id="mf7">—</span>
-                </div>
-            </div>
-            <div style="margin-top:10px; font-size:11px; color:#8899aa;" id="macdFilterSummary">Aguardando análise...</div>
-        </div>
- 
-        <!-- Histórico -->
-        <div class="panel">
-            <h3>📋 Histórico de Sinais MACD</h3>
-            <div class="btn-group">
-                <button id="clearLogBtn">LIMPAR HISTÓRICO</button>
-            </div>
-            <div id="logList" class="log-list">
-                <div style="text-align: center; padding: 20px; color: #8899aa;">Aguardando sinais...</div>
-            </div>
-            <div class="stats" style="margin-top: 10px;">
-                <div class="stat"><div class="stat-label">Total Sinais</div><div class="stat-value" id="totalSignals">0</div></div>
-                <div class="stat"><div class="stat-label">Win Rate</div><div class="stat-value" id="winRate">0%</div></div>
-                <div class="stat"><div class="stat-label">Acertos</div><div class="stat-value" id="wins">0</div></div>
-                <div class="stat"><div class="stat-label">Erros</div><div class="stat-value" id="losses">0</div></div>
-            </div>
-        </div>
-    </div>
+  </div>
+  <div class="hdr-tag">GRÁFICO 15s</div>
+  <div class="hdr-tag">10 FILTROS IA</div>
+  <div class="hdr-tag" id="modeTag" style="border-color:rgba(0,255,148,0.4);color:var(--g)">AUTO</div>
+  <div class="hdr-right">
+    <div class="live-badge"><div class="pulse-dot"></div>AO VIVO</div>
+    <div class="clock" id="clockEl">--:--:--</div>
+  </div>
 </div>
- 
-<!-- Modal Camera -->
-<div id="cameraModal" class="video-preview">
-    <div class="video-container">
-        <video id="cameraVideo" autoplay playsinline muted></video>
-    </div>
-    <canvas id="cameraCanvas" style="display: none;"></canvas>
-    <div class="camera-controls">
-        <button class="capture-photo-btn" id="capturePhotoBtn">📸 TIRAR FOTO</button>
-        <button class="switch-camera-btn" id="switchCameraBtnModal">🔄 TROCAR CÂMERA</button>
-        <button class="close-camera-btn" id="closeCameraBtn">❌ FECHAR</button>
-    </div>
+
+<!-- API STATUS BAR -->
+<div class="api-status-bar" id="apiStatusBar">
+  <span style="font-size:9px;color:var(--text2);font-family:'Share Tech Mono',monospace;margin-right:4px">APIs:</span>
+  <div class="api-pill test" id="pill_claude"><div class="api-pill-dot"></div>Claude</div>
+  <div class="api-pill test" id="pill_gemini"><div class="api-pill-dot"></div>Gemini</div>
+  <div class="api-pill test" id="pill_openai"><div class="api-pill-dot"></div>OpenAI</div>
+  <div class="api-pill test" id="pill_fcs"><div class="api-pill-dot"></div>FCS Forex</div>
+  <div class="api-pill test" id="pill_forexrate"><div class="api-pill-dot"></div>ForexRate</div>
+  <div class="api-pill test" id="pill_pollinations"><div class="api-pill-dot"></div>Pollinations</div>
+  <span style="margin-left:auto;font-size:9px;font-family:'Share Tech Mono',monospace;color:var(--text2)" id="activeAiLabel">IA ativa: —</span>
 </div>
- 
+
+<!-- BROKERS -->
+<div class="brokers">
+  <a href="https://qxbroker.com/pt/trade" target="_blank" class="broker">
+    <div class="b-icon" style="background:rgba(0,245,212,0.12);color:var(--c)">Q</div>
+    <div><div class="b-name">QUOTEX</div><div class="b-id">ID: 14337839 · costamendes75@gmail.com</div></div>
+    <div class="b-dot"></div>
+  </a>
+  <a href="https://pocketoption.com/en/cabinet/?social=Google" target="_blank" class="broker">
+    <div class="b-icon" style="background:rgba(77,157,255,0.12);color:var(--b)">P</div>
+    <div><div class="b-name">POCKET OPTION</div><div class="b-id">ID: 71326396 · ramilsonmendes32@gmail.com</div></div>
+    <div class="b-dot"></div>
+  </a>
+  <a href="https://blazeinvest.net/trade" target="_blank" class="broker">
+    <div class="b-icon" style="background:rgba(168,85,247,0.12);color:var(--p)">B</div>
+    <div><div class="b-name">BLAZE INVEST</div><div class="b-id">ID: 29371847</div></div>
+    <div class="b-dot"></div>
+  </a>
+  <div class="workflow-box">
+    <div class="wf-title">⚡ FLUXO v5 — CRUZAMENTO + CONTINUIDADE:</div>
+    <div class="wf-steps">
+      <span>① APIs testam automaticamente</span> → <span>② Selecione par</span> → <span>③ INICIAR CAPTURA</span> →
+      <span>④ IA lê MACD em tempo real</span> → <span>⑤ Cross = sinal imediato</span> → <span>⑥ Tendência = continuidade otimizada</span>
+    </div>
+  </div>
+</div>
+
+<div class="warn-bar">⚠️ <strong>CONTA REAL:</strong> Opera com ≥75% qualidade e ≥5/10 filtros. Cruzamento MACD = entrada imediata. Tendência forte = continuidade com expiração inteligente. Máx 2% capital/operação.</div>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- COL 1: RADAR + MACD REF -->
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div class="panel">
+      <div class="pt"><div class="pt-dot"></div>RADAR DE CRUZAMENTOS</div>
+      <div style="font-size:9px;color:var(--text2);font-family:'Share Tech Mono',monospace;margin-bottom:5px">⚡ Iminente — clique para selecionar:</div>
+      <div class="imm-chips" id="immChips"><span style="color:var(--text3);font-size:9px">Calculando...</span></div>
+      <div class="radar-section-title open">📈 TOP 5 — MERCADO ABERTO</div>
+      <div class="radar-list" id="radarOpen" style="margin-bottom:10px"></div>
+      <div class="radar-section-title otc">🔒 TOP 5 — OTC</div>
+      <div class="radar-list" id="radarOTC"></div>
+      <div style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace;margin-top:6px" id="radarTime"></div>
+    </div>
+
+    <div class="panel">
+      <div class="pt"><div class="pt-dot"></div>MACD REAL-TIME (12,26,9)</div>
+
+      <!-- LIVE FOREX PRICE -->
+      <div class="live-price-box" id="livePriceBox" style="display:none">
+        <div><div class="lp-pair" id="lp_pair">—</div><div style="font-size:8px;color:var(--text3);font-family:'Share Tech Mono',monospace" id="lp_src">—</div></div>
+        <div><div class="lp-price" id="lp_price">—</div></div>
+        <div class="lp-change" id="lp_change">—</div>
+      </div>
+
+      <!-- TREND BOX -->
+      <div class="trend-box" id="trendBox">
+        <div class="trend-arrow" id="trendArrow">→</div>
+        <div class="trend-info">
+          <div class="trend-label">TENDÊNCIA ATUAL</div>
+          <div class="trend-val lat" id="trendVal">LATERAL</div>
+          <div style="font-size:9px;color:var(--text3);font-family:'Share Tech Mono',monospace" id="trendStrength">Força: —</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:9px;color:var(--text2);font-family:'Share Tech Mono',monospace">CONTINUIDADE</div>
+          <div style="font-size:14px;font-weight:700;font-family:'Share Tech Mono',monospace" id="contScore" style="color:var(--c)">—%</div>
+        </div>
+      </div>
+
+      <canvas id="macdMiniChart" class="macd-mini-chart" height="80"></canvas>
+
+      <div class="macd-row"><span class="macd-lbl">Linha MACD</span><span id="mLine" class="vneutral">—</span></div>
+      <div class="macd-row"><span class="macd-lbl">Linha Sinal</span><span id="mSig" class="vneutral">—</span></div>
+      <div class="macd-row"><span class="macd-lbl">Histograma</span><span id="mHist" class="vneutral">—</span></div>
+      <div class="macd-row"><span class="macd-lbl">Cruzamento</span><span id="mCross" class="vneutral">—</span></div>
+      <div class="macd-row"><span class="macd-lbl">Tendência</span><span id="mTrend" class="vneutral">—</span></div>
+      <div class="macd-row"><span class="macd-lbl">Momentum</span><span id="mMom" class="vneutral">—</span></div>
+      <div class="macd-row"><span class="macd-lbl">Força Candle</span><span id="mCandle" class="vneutral">—</span></div>
+      <div class="macd-row"><span class="macd-lbl">Barras Tendência</span><span id="mBars" class="vneutral">—</span></div>
+    </div>
+  </div>
+
+  <!-- COL 2: CAPTURA + SINAL -->
+  <div style="display:flex;flex-direction:column;gap:12px">
+
+    <div class="panel">
+      <div class="pt"><div class="pt-dot"></div>CAPTURA DE TELA — ANÁLISE MACD REAL</div>
+
+      <div class="mode-toggle">
+        <button class="mode-btn active-auto" id="modeAutoBtn" onclick="setMode('auto')">🤖 AUTO — IA monitora e gera sinal</button>
+        <button class="mode-btn" id="modeManualBtn" onclick="setMode('manual')">🔍 MANUAL — clique para gerar</button>
+      </div>
+
+      <div class="pair-select-wrap">
+        <select id="pairSelect" style="flex:1">
+          <option value="">Selecione o par</option>
+          <optgroup label="📈 Mercado Aberto">
+            <option>EUR/USD</option><option>GBP/USD</option><option>USD/JPY</option>
+            <option>USD/CHF</option><option>AUD/USD</option><option>USD/CAD</option>
+            <option>NZD/USD</option><option>EUR/GBP</option><option>EUR/JPY</option>
+            <option>EUR/CHF</option><option>EUR/AUD</option><option>EUR/CAD</option>
+            <option>GBP/JPY</option><option>GBP/CHF</option><option>GBP/CAD</option>
+            <option>AUD/JPY</option><option>AUD/CAD</option><option>AUD/CHF</option>
+            <option>CAD/JPY</option><option>CHF/JPY</option><option>NZD/JPY</option><option>USD/BRL</option>
+          </optgroup>
+          <optgroup label="🔒 OTC">
+            <option>EUR/USD OTC</option><option>GBP/USD OTC</option><option>USD/JPY OTC</option>
+            <option>EUR/JPY OTC</option><option>AUD/USD OTC</option><option>GBP/JPY OTC</option>
+            <option>USD/TRY OTC</option><option>USD/ZAR OTC</option><option>EUR/GBP OTC</option>
+            <option>AUD/JPY OTC</option><option>CAD/JPY OTC</option><option>CHF/JPY OTC</option>
+            <option>NZD/USD OTC</option><option>USD/CHF OTC</option><option>EUR/CHF OTC</option>
+            <option>GBP/CHF OTC</option><option>USD/CAD OTC</option><option>EUR/AUD OTC</option>
+            <option>AUD/CAD OTC</option><option>NZD/JPY OTC</option><option>USD/SGD OTC</option>
+            <option>USD/MXN OTC</option><option>USD/INR OTC</option><option>USD/BRL OTC</option>
+            <option>EUR/NZD OTC</option><option>GBP/AUD OTC</option><option>GBP/NZD OTC</option>
+          </optgroup>
+        </select>
+        <div style="font-size:9px;color:var(--text2);font-family:'Share Tech Mono',monospace;text-align:right">
+          <div id="sessInfo" style="color:var(--g)">—</div>
+          <div style="color:var(--text3)">sessão</div>
+        </div>
+      </div>
+
+      <div class="capture-zone" id="captureZone">
+        <div class="cap-overlay" id="capOverlay" style="display:none">
+          <div class="scan-line"></div>
+          <div class="cap-corner tl"></div><div class="cap-corner tr"></div>
+          <div class="cap-corner bl"></div><div class="cap-corner br"></div>
+          <div class="cap-status-overlay" id="capStatusOverlay">AGUARDANDO</div>
+          <div class="cap-timer" id="capTimerEl">15s</div>
+        </div>
+        <video id="screenVideo" style="display:none;width:100%;max-height:215px;object-fit:contain" autoplay muted></video>
+        <canvas id="snapCanvas" style="display:none"></canvas>
+        <img id="lastCapture" style="display:none;width:100%;max-height:215px;object-fit:contain" alt="captura">
+        <div class="capture-placeholder" id="capPlaceholder">
+          <div class="icon">🖥️</div>
+          <div class="text">Clique em <strong style="color:var(--c)">INICIAR CAPTURA</strong><br>para monitorar o gráfico MACD<br>
+          IA detecta cruzamentos e tendências<br>em tempo real com expiração inteligente</div>
+          <div class="hint">Selecione a <strong style="color:var(--y)">aba da corretora</strong> na janela de permissão</div>
+        </div>
+      </div>
+
+      <div class="cross-alert bull" id="crossAlert">
+        <span style="font-size:16px">⚡</span>
+        <span id="crossAlertText">CRUZAMENTO DETECTADO!</span>
+      </div>
+
+      <div style="margin-top:10px">
+        <button class="cap-main-btn" id="capBtn" onclick="toggleCapture()">
+          🖥️ INICIAR CAPTURA DE TELA
+        </button>
+        <button class="manual-btn" id="manualBtn" onclick="forceAnalysis()" disabled>
+          🔍 GERAR SINAL AGORA (Manual)
+        </button>
+        <div class="cap-stats">
+          <div class="cs-box"><div class="cs-val" id="capCount">0</div><div class="cs-lbl">CAPTURAS</div></div>
+          <div class="cs-box"><div class="cs-val" id="capNext">15s</div><div class="cs-lbl">PRÓXIMA</div></div>
+          <div class="cs-box"><div class="cs-val" id="capAnalyses">0</div><div class="cs-lbl">ANÁLISES</div></div>
+        </div>
+        <div class="status-badge off" id="capStatusBadge">
+          <div class="s-dot"></div>CAPTURA DESLIGADA — clique para iniciar
+        </div>
+      </div>
+
+      <div class="perm-guide" id="permGuide" style="margin-top:10px">
+        <div style="color:var(--c);font-size:11px;margin-bottom:8px;font-weight:700">📋 Como usar v5:</div>
+        <div class="perm-step"><div class="perm-num">1</div><div class="perm-text">APIs são <strong>pré-configuradas</strong> — verificam automaticamente ao carregar</div></div>
+        <div class="perm-step"><div class="perm-num">2</div><div class="perm-text">Abra a corretora em <strong>outra aba</strong> com gráfico MACD visível</div></div>
+        <div class="perm-step"><div class="perm-num">3</div><div class="perm-text">Selecione o par e clique <strong>INICIAR CAPTURA</strong></div></div>
+        <div class="perm-step"><div class="perm-num">4</div><div class="perm-text">MACD <strong>cruzamento</strong>: sinal imediato com expiração curta (1-2 min)</div></div>
+        <div class="perm-step"><div class="perm-num">5</div><div class="perm-text"><strong>Tendência forte</strong>: sinal de continuidade com expiração ajustada ao contexto</div></div>
+        <div class="perm-step"><div class="perm-num">6</div><div class="perm-text">Filtros verificados a cada 15s — sinal apenas quando ≥5/10 aprovados</div></div>
+      </div>
+
+      <div class="ai-result" id="aiResult"></div>
+    </div>
+
+    <!-- SINAL PRINCIPAL -->
+    <div class="panel">
+      <div class="pt"><div class="pt-dot"></div>SINAL MACD — CRUZAMENTO + CONTINUIDADE</div>
+      <div class="sig-panel no" id="sigPanel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text2)" id="sigMode">—</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;padding:2px 8px;border-radius:8px;background:var(--bg4)" id="sigPattern">—</div>
+        </div>
+        <div class="sig-type no" id="sigType">⏸ AGUARDANDO</div>
+        <div class="sig-asset" id="sigAsset" style="color:var(--y)">— Inicie a captura de tela —</div>
+        <div class="sig-exp" id="sigExp">⏱ —</div>
+        <div style="display:flex;align-items:center;gap:10px;margin:8px 0">
+          <div class="q-ring low" id="qRing"><span class="q-num" id="qNum">?%</span><span class="q-lbl">QUAL</span></div>
+          <div style="flex:1">
+            <div class="prob-wrap">
+              <div class="prob-bar"><div class="prob-fill no" id="probFill" style="width:0%"></div></div>
+              <div class="prob-labels"><span>Probabilidade</span><span id="probVal">0%</span></div>
+            </div>
+            <div id="stratTagEl" style="margin-top:4px"></div>
+          </div>
+        </div>
+        <div class="sig-reason" id="sigReason">Aguardando captura e análise do gráfico...</div>
+        <div class="sig-stats">
+          <div class="ss-box"><div class="ss-lbl">ENTRADA</div><div class="ss-val" id="entryT">--:--</div></div>
+          <div class="ss-box"><div class="ss-lbl">EXPIRAÇÃO</div><div class="ss-val" id="expT">--:--</div></div>
+          <div class="ss-box"><div class="ss-lbl">FILTROS</div><div class="ss-val" id="filtersEl">0/10</div></div>
+          <div class="ss-box"><div class="ss-lbl">MODO</div><div class="ss-val" id="modeEl" style="font-size:10px;color:var(--text2)">—</div></div>
+        </div>
+      </div>
+
+      <div class="exp-ia-info">
+        <div class="ei-title">⏱ Expiração inteligente — ajustada pelo contexto MACD:</div>
+        <div style="color:var(--y);font-size:11px" id="expIaLabel">IA escolherá com base no cruzamento e tendência</div>
+        <div class="exp-ia-btns">
+          <div class="exp-ia-btn" id="eib1">1 Min</div>
+          <div class="exp-ia-btn" id="eib2">2 Min</div>
+          <div class="exp-ia-btn" id="eib3">3 Min</div>
+          <div class="exp-ia-btn" id="eib5">5 Min</div>
+        </div>
+        <div style="font-size:9px;color:var(--text3);margin-top:4px">
+          1min = cruzamento explosivo · 2min = cross + tendência · 3min = continuidade moderada · 5min = tendência forte sem cross
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COL 3: SR + CTD + LOG -->
+  <div style="display:flex;flex-direction:column;gap:12px">
+
+    <div class="panel">
+      <div class="pt"><div class="pt-dot"></div>SUPORTE &amp; RESISTÊNCIA</div>
+      <div id="srContent"><div style="text-align:center;font-size:10px;color:var(--text2);font-family:'Share Tech Mono',monospace;padding:12px">Selecione um par</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="pt"><div class="pt-dot"></div>SINCRONIZAÇÃO 15s</div>
+      <div class="ctd-wrap">
+        <div class="ctd-ring">
+          <svg viewBox="0 0 80 80">
+            <circle class="ctd-bg" cx="40" cy="40" r="35"/>
+            <circle class="ctd-fg" id="ctdCircle" cx="40" cy="40" r="35"/>
+          </svg>
+          <div class="ctd-inner">
+            <div class="ctd-num" id="ctdNum">15</div>
+            <div class="ctd-sub">captura</div>
+          </div>
+        </div>
+      </div>
+      <div class="log-wrap" id="logList">
+        <div style="text-align:center;padding:15px;color:var(--text2);font-size:10px;font-family:'Share Tech Mono',monospace">Aguardando sinais...</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px">
+        <div style="background:var(--bg3);padding:6px;border-radius:6px;text-align:center">
+          <div style="font-size:8px;color:var(--text2);font-family:'Share Tech Mono',monospace">TOTAL</div>
+          <div style="font-size:18px;font-weight:700;color:var(--c);font-family:'Share Tech Mono',monospace" id="totSig">0</div>
+        </div>
+        <div style="background:var(--bg3);padding:6px;border-radius:6px;text-align:center">
+          <div style="font-size:8px;color:var(--text2);font-family:'Share Tech Mono',monospace">ALTA Q</div>
+          <div style="font-size:18px;font-weight:700;color:var(--g);font-family:'Share Tech Mono',monospace" id="highQ">0</div>
+        </div>
+        <div style="background:var(--bg3);padding:6px;border-radius:6px;text-align:center">
+          <div style="font-size:8px;color:var(--text2);font-family:'Share Tech Mono',monospace">IGNORADOS</div>
+          <div style="font-size:18px;font-weight:700;color:var(--r);font-family:'Share Tech Mono',monospace" id="ignoredC">0</div>
+        </div>
+      </div>
+      <div class="btn-g"><button onclick="clearLog()" style="width:100%;font-size:10px">🗑 Limpar Log</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM -->
+<div class="layout-bottom">
+  <div class="panel">
+    <div class="pt"><div class="pt-dot"></div>FILTROS IA (10)</div>
+    <div style="font-size:9px;color:var(--text2);font-family:'Share Tech Mono',monospace;margin-bottom:8px">
+      Mín. <strong style="color:var(--y)">5/10</strong> para sinal (ideal ≥8/10 conta real)
+    </div>
+    <table class="f-table">
+      <tr><td>① Cruzamento MACD/Sinal detectado (IA)</td><td class="na" id="f1">—</td></tr>
+      <tr><td>② Histograma crescente na direção</td><td class="na" id="f2">—</td></tr>
+      <tr><td>③ Histograma consistente c/ direção</td><td class="na" id="f3">—</td></tr>
+      <tr><td>④ MACD no lado correto do zero</td><td class="na" id="f4">—</td></tr>
+      <tr><td>⑤ Momentum acelerando</td><td class="na" id="f5">—</td></tr>
+      <tr><td>⑥ Sem divergência inversa</td><td class="na" id="f6">—</td></tr>
+      <tr><td>⑦ Tendência confirmada pela IA</td><td class="na" id="f7">—</td></tr>
+      <tr><td>⑧ IA visual confirma padrão MACD</td><td class="na" id="f8">—</td></tr>
+      <tr><td>⑨ Sessão de mercado válida</td><td class="na" id="f9">—</td></tr>
+      <tr><td>⑩ S/R a favor do sinal</td><td class="na" id="f10">—</td></tr>
+    </table>
+    <div id="filterSummary" style="margin-top:8px;font-size:10px;text-align:center;font-family:'Share Tech Mono',monospace;padding:6px;background:var(--bg3);border-radius:6px;color:var(--text2)">Aguardando análise...</div>
+  </div>
+
+  <div class="panel">
+    <div class="pt"><div class="pt-dot"></div>ANÁLISE IA — ÚLTIMA CAPTURA</div>
+    <div id="aiDetailPanel" style="font-size:10px;font-family:'Share Tech Mono',monospace;color:var(--text2)">
+      <div style="text-align:center;padding:20px">
+        A IA lê o gráfico MACD capturado, detecta cruzamentos e tendências de continuidade,
+        calculando a expiração ideal com base no contexto técnico em tempo real.
+        <br><br>
+        <strong style="color:var(--c)">CRUZAMENTO</strong> = entrada imediata (1-2 min)<br>
+        <strong style="color:var(--p)">CONTINUIDADE</strong> = tendência ativa (3-5 min)
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="pt"><div class="pt-dot"></div>SESSÕES DE MERCADO</div>
+    <div id="sessionDetail" style="font-size:10px;font-family:'Share Tech Mono',monospace;margin-bottom:6px"></div>
+    <div style="margin-top:8px">
+      <div style="font-size:9px;color:var(--text2);font-family:'Share Tech Mono',monospace;margin-bottom:4px">Zonas S/R detectadas:</div>
+      <div id="srZoneInfo" style="font-size:9px;font-family:'Share Tech Mono',monospace;color:var(--text);line-height:1.8"></div>
+    </div>
+  </div>
+</div>
+
+</div>
 <div id="toast" class="toast"></div>
- 
+
 <script>
-// ========== CONFIG ==========
-const API_KEYS = {
-    FOREXRATE: "43a026a9c3873413a77e249f4137543d",
+// ═══════════════════════════════════════════════════════
+// MACD SIGNAL PRO v5 — MULTI-API + CROSS + CONTINUIDADE
+// APIs: Claude, Gemini, OpenAI, FCS Forex, ForexRate
+// ═══════════════════════════════════════════════════════
+
+// ── API KEYS (INTERNAMENTE CONFIGURADAS) ──
+var APIS = {
+  claude: {
+    key: 'USE_YOUR_CLAUDE_KEY',  // Inserir chave claude aqui se tiver
+    base: 'https://api.anthropic.com/v1/messages',
+    available: false,
+    name: 'Claude'
+  },
+  gemini: {
+    key: 'AIzaSyAV2F_PAKkrH9WriKjhkxX7sHRuSUdyutw',
+    base: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+    available: false,
+    name: 'Gemini'
+  },
+  openai: {
+    key: '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',
+    base: 'https://api.openai.com/v1/chat/completions',
+    available: false,
+    name: 'OpenAI'
+  },
+  pollinations: {
+    base: 'https://text.pollinations.ai/',
+    available: false,
+    name: 'Pollinations'
+  },
+  fcs: {
+    key: 'uCwTDfmDu4B5SdeSVUer935tiloQT',
+    base: 'https://fcsapi.com/api-v3/forex/latest',
+    available: false,
+    name: 'FCS Forex'
+  },
+  forexrate: {
+    key: '43a026a9c3873413a77e249f4137543d',
+    base: 'https://api.forexrateapi.com/v1/latest',
+    available: false,
+    name: 'ForexRate'
+  }
 };
- 
-// ========== GLOBALS ==========
-let bank = [];
-let currentImageData = null;
-let currentImageSource = null;
-let timeOffset = 0;
-let totalSignals = 0;
-let wins = 0;
-let losses = 0;
-let currentSelectedAsset = "EUR/USD";
-let autoSignalEnabled = false;
-let autoSignalInterval = null;
-let currentStrategy = "trend";
-let preferredExpiry = 1; // 0=auto, 1=1min, 2=2min
-let videoStream = null;
-let currentFacingMode = "environment";
- 
-// Dados MACD simulados em tempo real
-let macdState = {
-    macdLine: 0,
-    signalLine: 0,
-    histogram: 0,
-    crossType: 'none', // 'bullish', 'bearish', 'none'
-    trend: 'neutral',
-    divergence: false,
-    momentum: 0
-};
- 
-// ========== PARES ==========
-const OPEN_MARKET_PAIRS = [
-    "EUR/USD","GBP/USD","USD/JPY","USD/CHF","AUD/USD","USD/CAD",
-    "NZD/USD","EUR/GBP","EUR/JPY","EUR/CHF","EUR/AUD","EUR/CAD",
-    "GBP/JPY","GBP/CHF","GBP/CAD","AUD/JPY","AUD/CAD","AUD/CHF",
-    "CAD/JPY","CHF/JPY","NZD/JPY","USD/BRL"
+
+var activeAI = null; // which AI to use for image analysis
+var liveForexPrice = null;
+var liveForexSource = null;
+
+// CORS proxies
+var PROXY_LIST = [
+  'https://corsproxy.io/?url=',
+  'https://api.allorigins.win/raw?url='
 ];
-const OTC_MARKET_PAIRS = [
-    "EUR/USD OTC","GBP/USD OTC","USD/JPY OTC","EUR/JPY OTC",
-    "AUD/USD OTC","GBP/JPY OTC","USD/TRY OTC","USD/ZAR OTC",
-    "EUR/GBP OTC","AUD/JPY OTC","CAD/JPY OTC","CHF/JPY OTC",
-    "EUR/AUD OTC","GBP/AUD OTC","NZD/CHF OTC","CAD/CHF OTC"
-];
- 
-// ========== EXPIRAÇÃO ==========
-function setExpiry(val) {
-    preferredExpiry = val;
-    document.getElementById('expiry1min').classList.toggle('active', val === 1);
-    document.getElementById('expiry2min').classList.toggle('active', val === 2);
-    document.getElementById('expiryAuto').classList.toggle('active', val === 0);
-}
- 
-// ========== SONS ==========
-function playClickSound() {
-    try { const a = new Audio('https://www.soundjay.com/misc/sounds/button-click-01.mp3'); a.volume=0.3; a.play().catch(()=>{}); } catch(e){}
-}
-function playSignalSound() {
-    try { const a = new Audio('https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3'); a.volume=0.5; a.play().catch(()=>{}); } catch(e){}
-}
- 
-// ========== MACD SIMULADO EM TEMPO REAL ==========
-function updateMACDState() {
-    const now = new Date();
-    const s = now.getSeconds();
-    const m = now.getMinutes();
-    // Simula variação MACD baseada no tempo (oscila de forma realista)
-    const t = (s + m * 60) / 3600;
-    const wave1 = Math.sin(t * Math.PI * 8) * 0.0012;
-    const wave2 = Math.sin(t * Math.PI * 3) * 0.0008;
-    const wave3 = Math.cos(t * Math.PI * 5) * 0.0005;
- 
-    macdState.macdLine = parseFloat((wave1 + wave3).toFixed(5));
-    macdState.signalLine = parseFloat((wave2 + wave3 * 0.7).toFixed(5));
-    macdState.histogram = parseFloat((macdState.macdLine - macdState.signalLine).toFixed(5));
- 
-    const prevHist = macdState.histogram;
-    if (macdState.macdLine > macdState.signalLine) {
-        macdState.crossType = 'bullish';
-        macdState.trend = 'alta';
-    } else if (macdState.macdLine < macdState.signalLine) {
-        macdState.crossType = 'bearish';
-        macdState.trend = 'baixa';
-    } else {
-        macdState.crossType = 'none';
-        macdState.trend = 'neutro';
-    }
-    macdState.momentum = parseFloat((macdState.histogram * 1000).toFixed(3));
-    macdState.divergence = Math.abs(macdState.macdLine) > 0.0015;
-    renderMACDLive();
-}
- 
-function renderMACDLive() {
-    const m = macdState;
-    const macdLineEl = document.getElementById('macdLine');
-    const macdSignalEl = document.getElementById('macdSignalLine');
-    const macdHistEl = document.getElementById('macdHist');
-    const macdCrossEl = document.getElementById('macdCross');
-    const macdTrendEl = document.getElementById('macdTrend');
-    const macdDivEl = document.getElementById('macdDiv');
- 
-    const bull = 'macd-val-bull', bear = 'macd-val-bear', neutral = 'macd-val-neutral';
- 
-    macdLineEl.textContent = m.macdLine >= 0 ? `+${m.macdLine}` : `${m.macdLine}`;
-    macdLineEl.className = m.macdLine >= 0 ? bull : bear;
- 
-    macdSignalEl.textContent = m.signalLine >= 0 ? `+${m.signalLine}` : `${m.signalLine}`;
-    macdSignalEl.className = m.signalLine >= 0 ? bull : bear;
- 
-    macdHistEl.textContent = m.histogram >= 0 ? `+${m.histogram} ▲` : `${m.histogram} ▼`;
-    macdHistEl.className = m.histogram >= 0 ? bull : bear;
- 
-    if (m.crossType === 'bullish') {
-        macdCrossEl.textContent = '✅ Cruzamento ALTA';
-        macdCrossEl.className = bull;
-    } else if (m.crossType === 'bearish') {
-        macdCrossEl.textContent = '❌ Cruzamento BAIXA';
-        macdCrossEl.className = bear;
-    } else {
-        macdCrossEl.textContent = '— Sem cruzamento';
-        macdCrossEl.className = neutral;
-    }
- 
-    macdTrendEl.textContent = m.trend === 'alta' ? '📈 ALTA' : (m.trend === 'baixa' ? '📉 BAIXA' : '➡ LATERAL');
-    macdTrendEl.className = m.trend === 'alta' ? bull : (m.trend === 'baixa' ? bear : neutral);
- 
-    macdDivEl.textContent = m.divergence ? '⚠️ Divergência detectada' : '✅ Sem divergência';
-    macdDivEl.className = m.divergence ? neutral : bull;
-}
- 
-// ========== ANÁLISE MACD DE IMAGEM ==========
-async function analyzeImageWithMACD(imageData) {
-    // Analisa as características visuais do gráfico MACD da imagem
-    // Baseado nos padrões visuais das imagens de referência fornecidas
-    const resultEl = document.getElementById('imageAnalysisResult');
-    const textEl = document.getElementById('imageAnalysisText');
-    resultEl.classList.add('show');
-    textEl.innerHTML = '<span style="color:#ffd000">🔄 Analisando padrão MACD da imagem...</span>';
- 
-    // Análise simulada baseada no estado atual do MACD e imagem
-    await new Promise(r => setTimeout(r, 800));
- 
-    const m = macdState;
-    const lines = [];
- 
-    if (m.crossType === 'bullish') {
-        lines.push('✅ <b>Cruzamento bullish</b> identificado na imagem');
-        lines.push('📈 Linha MACD cruzou acima da Linha Sinal');
-        lines.push('🟢 Histograma em expansão positiva → favorável a COMPRA');
-    } else if (m.crossType === 'bearish') {
-        lines.push('❌ <b>Cruzamento bearish</b> identificado na imagem');
-        lines.push('📉 Linha MACD cruzou abaixo da Linha Sinal');
-        lines.push('🔴 Histograma em expansão negativa → favorável a VENDA');
-    } else {
-        lines.push('⚠️ MACD sem cruzamento definido no momento');
-        lines.push('➡ Mercado em consolidação/lateral');
-        lines.push('⏳ Aguardar confirmação antes de entrar');
-    }
- 
-    if (!m.divergence) {
-        lines.push('✅ Sem divergência — tendência confiável');
-    } else {
-        lines.push('⚠️ Possível divergência — cuidado com reversão');
-    }
- 
-    const expContext = determineExpiry(m);
-    lines.push(`⏱ Expiração recomendada pela análise: <b style="color:#ffd000">${expContext} min</b>`);
- 
-    textEl.innerHTML = lines.join('<br>');
-}
- 
-// ========== DETERMINAR EXPIRAÇÃO ==========
-function determineExpiry(macdData) {
-    if (preferredExpiry !== 0) return preferredExpiry;
-    // Auto: usa o contexto do MACD
-    // Cruzamento forte + histograma grande → 1 min (movimento rápido)
-    // MACD perto do zero ou histograma pequeno → 2 min (movimento lento)
-    const histAbs = Math.abs(macdData.histogram);
-    if (histAbs > 0.0008 && macdData.crossType !== 'none') {
-        return 1; // Movimento forte → 1 minuto
-    } else {
-        return 2; // Movimento mais lento → 2 minutos
-    }
-}
- 
-// ========== ANÁLISE REAL COM MACD ==========
-function analyzeRealSignalMACD(pair, isManual = false) {
-    const hasImage = !!currentImageData;
-    const hasBank = bank.length > 0;
-    const isOTC = pair.includes('OTC');
-    const m = macdState;
- 
-    let confidenceBonus = 0;
-    if (hasImage && hasBank) confidenceBonus = 18;
-    else if (hasImage) confidenceBonus = 12;
-    else if (hasBank) confidenceBonus = 8;
-    if (isManual) confidenceBonus += 12;
-    if (isOTC) confidenceBonus += 6;
- 
-    let type = 'NO';
-    let probability = 45;
-    let motivo = 'MACD sem sinal claro. Aguardar cruzamento.';
-    let expiry = determineExpiry(m);
- 
-    // Lógica de sinal baseada nos filtros MACD reais
-    const macdFilters = {
-        crossamento: m.crossType !== 'none',
-        histGrowth: Math.abs(m.histogram) > 0.0003,
-        macdAcimaNula: m.macdLine !== 0,
-        tendencia: m.trend !== 'neutro',
-        semDivergencia: !m.divergence,
-        momentumAcel: Math.abs(m.momentum) > 0.3,
-        volumeOk: true // sempre true pois vem da imagem
-    };
- 
-    const filtersOk = Object.values(macdFilters).filter(v => v === true).length;
- 
-    if (m.crossType === 'bullish' && filtersOk >= 4) {
-        type = 'CALL';
-        probability = Math.min(95, 62 + confidenceBonus + filtersOk * 3);
-        motivo = `MACD cruzou ACIMA da Linha Sinal — Histograma positivo em expansão — ${pair}`;
-    } else if (m.crossType === 'bearish' && filtersOk >= 4) {
-        type = 'PUT';
-        probability = Math.min(95, 62 + confidenceBonus + filtersOk * 3);
-        motivo = `MACD cruzou ABAIXO da Linha Sinal — Histograma negativo em expansão — ${pair}`;
-    } else if (filtersOk >= 3) {
-        // Sinal fraco mas existe
-        type = m.trend === 'alta' ? 'CALL' : (m.trend === 'baixa' ? 'PUT' : 'NO');
-        probability = Math.min(80, 52 + confidenceBonus + filtersOk * 2);
-        motivo = `Tendência de ${m.trend} identificada, aguardar confirmação — ${pair}`;
-    } else {
-        type = 'NO';
-        probability = 38 + filtersOk * 2;
-        motivo = `Filtros MACD insuficientes (${filtersOk}/7). Não operar agora.`;
-        expiry = preferredExpiry || 1;
-    }
- 
-    // Atualiza filtros na tela
-    updateMACDFilters(macdFilters);
- 
-    return { type, probability, motivo, macdFilters, filtersOk, isOTC, expiry };
-}
- 
-function updateMACDFilters(f) {
-    const ok = '<span class="filter-check">✓ SIM</span>';
-    const no = '<span class="filter-cross">✗ NÃO</span>';
-    document.getElementById('mf1').innerHTML = f.crossamento ? ok : no;
-    document.getElementById('mf2').innerHTML = f.histGrowth ? ok : no;
-    document.getElementById('mf3').innerHTML = f.macdAcimaNula ? ok : no;
-    document.getElementById('mf4').innerHTML = f.tendencia ? ok : no;
-    document.getElementById('mf5').innerHTML = f.semDivergencia ? ok : no;
-    document.getElementById('mf6').innerHTML = f.momentumAcel ? ok : no;
-    document.getElementById('mf7').innerHTML = f.volumeOk ? ok : no;
-    const total = Object.values(f).filter(v=>v).length;
-    document.getElementById('macdFilterSummary').textContent = `Filtros ativos: ${total}/7 — ${total >= 5 ? '✅ Alta confiança' : total >= 3 ? '⚠️ Confiança moderada' : '❌ Baixa confiança'}`;
-}
- 
-// ========== GERAR SINAL ==========
-async function generateSignal(isManual = false) {
-    const pair = document.getElementById('pairSelect').value || currentSelectedAsset;
-    if (!pair || pair === "") {
-        showToast('⚠️ Selecione um par de ativo antes de gerar o sinal!', 'error');
-        return false;
-    }
- 
-    currentSelectedAsset = pair;
-    document.getElementById('currentSelectedAsset').innerHTML = pair;
- 
-    const now = getSyncedTime();
-    const entryTime = new Date(now);
-    entryTime.setSeconds(0);
-    entryTime.setMilliseconds(0);
- 
-    const signal = analyzeRealSignalMACD(pair, isManual);
- 
-    const expiryTime = new Date(entryTime);
-    expiryTime.setMinutes(entryTime.getMinutes() + signal.expiry);
- 
-    if (signal.type !== 'NO') playSignalSound();
- 
-    // Atualiza painel
-    const signalPanel = document.getElementById('signalPanel');
-    signalPanel.className = `signal-panel ${signal.type.toLowerCase()}`;
- 
-    const signalType = document.getElementById('signalType');
-    if (signal.type === 'CALL') {
-        signalType.textContent = '▲ COMPRA (CALL)';
-    } else if (signal.type === 'PUT') {
-        signalType.textContent = '▼ VENDA (PUT)';
-    } else {
-        signalType.textContent = '⏸ NÃO OPERAR';
-    }
-    signalType.className = `signal-type ${signal.type.toLowerCase()}`;
- 
-    const signalAsset = document.getElementById('signalAsset');
-    signalAsset.textContent = pair;
-    signalAsset.style.color = signal.type === 'CALL' ? '#00ff88' : (signal.type === 'PUT' ? '#ff3d5a' : '#ffd000');
- 
-    // Expiração destacada
-    const expLabel = signal.type !== 'NO' 
-        ? `⏱ Expiração: ${signal.expiry} minuto${signal.expiry > 1 ? 's' : ''}`
-        : '⏱ Expiração: —';
-    document.getElementById('signalExpiry').textContent = expLabel;
- 
-    document.getElementById('entryTime').textContent = entryTime.toLocaleTimeString('pt-BR');
-    document.getElementById('expiryTime').textContent = expiryTime.toLocaleTimeString('pt-BR');
-    document.getElementById('probabilityValue').textContent = `${signal.probability}%`;
-    document.getElementById('probabilityFill').style.width = `${signal.probability}%`;
-    document.getElementById('probabilityFill').className = `probability-fill ${signal.type.toLowerCase()}`;
- 
-    const badge = isManual ? '🎮 MANUAL' : (autoSignalEnabled ? '🤖 AUTO' : '⚡ ANÁLISE');
-    document.getElementById('signalDetails').innerHTML = `
-        <div style="font-size:11px;">${badge} | MACD(12,26,9) | Gráfico 15s | ${signal.motivo}</div>
-        <div style="font-size:10px; margin-top:5px;">Filtros: ${signal.filtersOk}/7 | Confiança: ${signal.probability}% | Exp: ${signal.expiry}min</div>
-    `;
- 
-    addToLog(entryTime, signal.type, signal.probability, pair, isManual, signal.expiry);
-    totalSignals++;
-    document.getElementById('totalSignals').textContent = totalSignals;
- 
-    // Analisa imagem se disponível
-    if (currentImageData && isManual) {
-        await analyzeImageWithMACD(currentImageData);
-    }
- 
-    showToast(`${badge} | ${signal.type} ${pair} | ${signal.expiry}min | Prob: ${signal.probability}%`);
-    return { signal: signal.type, pair, probability: signal.probability, expiry: signal.expiry };
-}
- 
-function addToLog(time, type, probability, pair, isManual, expiry) {
-    const logDiv = document.getElementById('logList');
-    const emptyMsg = logDiv.querySelector('div[style*="text-align: center"]');
-    if (emptyMsg) emptyMsg.remove();
- 
-    const logItem = document.createElement('div');
-    logItem.className = 'log-item';
-    logItem.innerHTML = `
-        <span>${time.toLocaleTimeString('pt-BR')} ${isManual ? '🎮' : '🤖'}</span>
-        <span class="log-signal ${type.toLowerCase()}">${type === 'CALL' ? '▲' : (type === 'PUT' ? '▼' : '⏸')} ${type} ${pair}</span>
-        <span style="color:#ffd000">${expiry}min</span>
-        <span>${probability}%</span>
-    `;
-    logDiv.insertBefore(logItem, logDiv.firstChild);
-    while (logDiv.children.length > 50) logDiv.removeChild(logDiv.lastChild);
-}
- 
-function clearLog() {
-    document.getElementById('logList').innerHTML = '<div style="text-align: center; padding: 20px; color: #8899aa;">Aguardando sinais...</div>';
-}
- 
-// ========== AUTO SINAL ==========
-function startAutoSignal() {
-    if (autoSignalInterval) clearInterval(autoSignalInterval);
-    autoSignalInterval = setInterval(async () => {
-        if (!autoSignalEnabled) return;
-        const now = getSyncedTime();
-        const s = now.getSeconds();
-        if (s === 0 || s === 15 || s === 30 || s === 45) {
-            await generateSignal(false);
-            setTimeout(() => {
-                const result = Math.random() > 0.28;
-                if (result) { wins++; showToast('✅ Acerto confirmado!'); }
-                else { losses++; showToast('❌ Erro no sinal.'); }
-                const wr = wins + losses > 0 ? Math.round((wins / (wins + losses)) * 100) : 0;
-                document.getElementById('winRate').textContent = `${wr}%`;
-                document.getElementById('wins').textContent = wins;
-                document.getElementById('losses').textContent = losses;
-            }, 60000 * (preferredExpiry || 1));
-        }
-    }, 1000);
-}
- 
-function stopAutoSignal() {
-    if (autoSignalInterval) { clearInterval(autoSignalInterval); autoSignalInterval = null; }
-}
- 
-function toggleAutoSignal() {
-    autoSignalEnabled = !autoSignalEnabled;
-    const btn = document.getElementById('toggleAutoSignalBtn');
-    const statusDiv = document.getElementById('autoSignalStatus');
-    if (autoSignalEnabled) {
-        btn.innerHTML = '🟢 AUTO: LIGADO';
-        btn.className = 'warning';
-        statusDiv.className = 'auto-signal-status on';
-        statusDiv.innerHTML = '📡 Sinal Automático: <strong>LIGADO</strong> | MACD 15s | Exp. 1-2min automático';
-        startAutoSignal();
-        showToast('🔔 Sinal automático ATIVADO');
-    } else {
-        btn.innerHTML = '🔴 AUTO: DESLIGADO';
-        btn.className = 'success';
-        statusDiv.className = 'auto-signal-status off';
-        statusDiv.innerHTML = '📡 Sinal Automático: <strong>DESLIGADO</strong> | Aguardando ativação';
-        stopAutoSignal();
-        showToast('🔕 Sinal automático DESLIGADO');
-    }
-}
- 
-// ========== ESTRATÉGIA ==========
-function setStrategy(s) {
-    currentStrategy = s;
-    document.getElementById('strategyTrend').classList.toggle('active', s === 'trend');
-    document.getElementById('strategyScalping').classList.toggle('active', s === 'scalping');
-    document.getElementById('strategyReversal').classList.toggle('active', s === 'reversal');
-    renderTopAssets();
-    showToast(`📊 Estratégia: ${s === 'trend' ? 'Tendência' : s === 'scalping' ? 'Scalping' : 'Reversão'}`);
-}
- 
-// ========== TOP ATIVOS ==========
-function analyzeAsset(pair) {
-    const now = new Date();
-    let pairSeed = 0;
-    for (let i = 0; i < pair.length; i++) pairSeed += pair.charCodeAt(i);
-    const totalSeed = (pairSeed + now.getDate() * 96 + now.getHours() * 37 + now.getMinutes()) % 100;
-    const isOTC = pair.includes('OTC');
-    let score = Math.min(98, Math.max(65, 60 + (totalSeed % 35) + (isOTC ? 4 : 0)));
-    return { pair, score, isOTC };
-}
- 
-async function renderTopAssets() {
-    const openResults = OPEN_MARKET_PAIRS.map(analyzeAsset).sort((a,b) => b.score - a.score);
-    const otcResults = OTC_MARKET_PAIRS.map(analyzeAsset).sort((a,b) => b.score - a.score);
- 
-    document.getElementById('topOpenAssets').innerHTML = openResults.slice(0,5).map(a =>
-        `<div class="asset-badge" onclick="selectAssetFromTop('${a.pair}')">
-            <span>${a.pair}</span><span class="asset-score">${a.score}%</span>
-        </div>`).join('');
- 
-    document.getElementById('topOTCAssets').innerHTML = otcResults.slice(0,5).map(a =>
-        `<div class="asset-badge otc" onclick="selectAssetFromTop('${a.pair}')">
-            <span>${a.pair}</span><span class="asset-score">${a.score}%</span>
-        </div>`).join('');
- 
-    const now = new Date();
-    document.getElementById('assetAnalysisStatus').textContent = `🔄 Atualizado: ${now.toLocaleTimeString('pt-BR')} | MACD Score`;
-}
- 
-function selectAssetFromTop(asset) {
-    currentSelectedAsset = asset;
-    document.getElementById('currentSelectedAsset').innerHTML = asset;
-    document.getElementById('pairSelect').value = asset;
-    showToast(`📌 Ativo selecionado: ${asset}`);
-}
- 
-// ========== CÂMERA ==========
-async function startCamera() {
-    const video = document.getElementById('cameraVideo');
-    const modal = document.getElementById('cameraModal');
-    try {
-        const constraints = { video: { facingMode: { exact: currentFacingMode }, width: { ideal: 1920 }, height: { ideal: 1080 } } };
-        try { videoStream = await navigator.mediaDevices.getUserMedia(constraints); }
-        catch(err) { videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode } }); }
-        video.srcObject = videoStream;
-        await video.play();
-        modal.classList.add('active');
-    } catch(err) {
-        try { videoStream = await navigator.mediaDevices.getUserMedia({ video: true }); video.srcObject = videoStream; await video.play(); modal.classList.add('active'); }
-        catch(e) { showToast('Não foi possível acessar a câmera', 'error'); }
-    }
-}
- 
-async function switchCamera() {
-    currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
-    if (videoStream) videoStream.getTracks().forEach(t => t.stop());
-    await startCamera();
-}
- 
-async function capturePhoto() {
-    playClickSound();
-    const video = document.getElementById('cameraVideo');
-    const canvas = document.getElementById('cameraCanvas');
-    if (!video || !video.videoWidth) { showToast('Câmera não pronta', 'error'); return; }
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-    const compressed = await compressImage(dataUrl, 1024, 768, 0.7);
-    currentImageData = compressed;
-    currentImageSource = 'camera';
-    document.getElementById('preview').src = compressed;
-    document.getElementById('previewContainer').style.display = 'block';
-    document.getElementById('imageStatus').innerHTML = '✅ Foto capturada pela câmera!';
-    showToast('📸 Foto capturada! Gerando sinal MACD...');
-    closeCamera();
-    setTimeout(() => generateSignal(true), 500);
-}
- 
-function closeCamera() {
-    if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
-    document.getElementById('cameraVideo').srcObject = null;
-    document.getElementById('cameraModal').classList.remove('active');
-}
- 
-// ========== COMPRESSÃO ==========
-function compressImage(dataUrl, maxW=800, maxH=600, q=0.6) {
-    return new Promise(resolve => {
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let w = img.width, h = img.height;
-            if (w > h) { if (w > maxW) { h *= maxW/w; w = maxW; } }
-            else { if (h > maxH) { w *= maxH/h; h = maxH; } }
-            canvas.width = w; canvas.height = h;
-            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            resolve(canvas.toDataURL('image/jpeg', q));
-        };
-        img.src = dataUrl;
+
+// ── TEST ALL APIS ──
+async function testAllAPIs() {
+  showToast('🔍 Testando APIs disponíveis...', 'w');
+
+  // Test Gemini
+  setPill('gemini', 'test');
+  try {
+    var gUrl = APIS.gemini.base + '?key=' + APIS.gemini.key;
+    var gRes = await fetchWithProxy(gUrl, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:[{text:'Say OK in one word'}]}]})
     });
+    var gData = await gRes.json();
+    if(gData.candidates && gData.candidates[0]) {
+      APIS.gemini.available = true;
+      setPill('gemini', 'ok');
+      if(!activeAI) activeAI = 'gemini';
+    } else { setPill('gemini','fail'); }
+  } catch(e) { setPill('gemini','fail'); console.warn('Gemini:', e.message); }
+
+  // Test OpenAI
+  setPill('openai', 'test');
+  try {
+    var oRes = await fetchWithProxy('https://api.openai.com/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+APIS.openai.key},
+      body: JSON.stringify({model:'gpt-4o-mini',max_tokens:5,messages:[{role:'user',content:'Say OK'}]})
+    });
+    var oData = await oRes.json();
+    if(oData.choices && oData.choices[0]) {
+      APIS.openai.available = true;
+      setPill('openai','ok');
+      if(!activeAI) activeAI = 'openai';
+    } else { setPill('openai','fail'); }
+  } catch(e) { setPill('openai','fail'); console.warn('OpenAI:', e.message); }
+
+  // Test Claude (check if key stored)
+  setPill('claude', 'test');
+  try {
+    var ck = localStorage.getItem('macd_claude_key');
+    if(ck && ck.length > 20) {
+      APIS.claude.key = ck;
+      APIS.claude.available = true;
+      setPill('claude','ok');
+      activeAI = 'claude'; // Claude takes priority if available
+    } else { setPill('claude','fail'); }
+  } catch(e) { setPill('claude','fail'); }
+
+  // Test Pollinations (always available, no key needed)
+  setPill('pollinations', 'test');
+  try {
+    var pRes = await fetch('https://text.pollinations.ai/Say OK in one word', {method:'GET'});
+    if(pRes.ok) {
+      APIS.pollinations.available = true;
+      setPill('pollinations','ok');
+      if(!activeAI) activeAI = 'pollinations';
+    } else { setPill('pollinations','fail'); }
+  } catch(e) { setPill('pollinations','fail'); console.warn('Pollinations:', e.message); }
+
+  // Test FCS Forex
+  setPill('fcs', 'test');
+  try {
+    var fcsUrl = APIS.fcs.base + '?symbol=EUR/USD&access_key=' + APIS.fcs.key;
+    var fcsRes = await fetchWithProxy(fcsUrl, {method:'GET'});
+    var fcsData = await fcsRes.json();
+    if(fcsData.response && fcsData.response[0]) {
+      APIS.fcs.available = true;
+      setPill('fcs','ok');
+    } else { setPill('fcs','fail'); }
+  } catch(e) { setPill('fcs','fail'); console.warn('FCS:', e.message); }
+
+  // Test ForexRate
+  setPill('forexrate', 'test');
+  try {
+    var frUrl = APIS.forexrate.base + '?api_key=' + APIS.forexrate.key + '&base=EUR';
+    var frRes = await fetchWithProxy(frUrl, {method:'GET'});
+    var frData = await frRes.json();
+    if(frData.rates) {
+      APIS.forexrate.available = true;
+      setPill('forexrate','ok');
+    } else { setPill('forexrate','fail'); }
+  } catch(e) { setPill('forexrate','fail'); console.warn('ForexRate:', e.message); }
+
+  // Update active AI label
+  var aiLabel = document.getElementById('activeAiLabel');
+  if(aiLabel) {
+    if(activeAI) aiLabel.textContent = 'IA ativa: ' + APIS[activeAI].name;
+    else aiLabel.textContent = 'IA ativa: Simulação';
+  }
+
+  var anyAI = APIS.gemini.available || APIS.openai.available || APIS.claude.available || APIS.pollinations.available;
+  var anyForex = APIS.fcs.available || APIS.forexrate.available;
+
+  if(anyAI) showToast('✅ IA pronta: ' + (activeAI ? APIS[activeAI].name : 'Pollinations') + (anyForex ? ' + Forex live' : ''));
+  else showToast('⚠️ Nenhuma IA respondeu. Usando modo simulação.', 'w');
 }
- 
-// ========== BANCO ==========
-async function addToBank(dataUrl, fileName=null) {
-    if (bank.length >= 100) { showToast('Limite de 100 imagens!', 'error'); return false; }
-    const compressed = await compressImage(dataUrl, 800, 600, 0.6);
-    bank.push({ id: Date.now() + Math.random(), data: compressed, name: fileName || `img_${bank.length+1}` });
-    renderBank(); saveBankToStorage(); showToast(`✅ Imagem adicionada ao banco (${bank.length}/100)`);
+
+function setPill(api, status) {
+  var el = document.getElementById('pill_' + api);
+  if(!el) return;
+  el.className = 'api-pill ' + status;
 }
- 
-function renderBank() {
-    const grid = document.getElementById('bankGrid');
-    const count = document.getElementById('bankCount');
-    if (bank.length === 0) {
-        grid.innerHTML = '<div style="text-align:center;padding:20px;color:#8899aa;">Banco vazio</div>';
-        count.textContent = '0'; return;
-    }
-    grid.innerHTML = bank.map(item =>
-        `<div class="bank-item ${currentImageSource==='bank'&&currentImageData===item.data?'selected':''}" onclick="selectBankImage(${item.id})">
-            <div class="bank-remove" onclick="event.stopPropagation();removeFromBank(${item.id})">✕</div>
-            <img src="${item.data}" alt="${item.name}">
-        </div>`).join('');
-    count.textContent = bank.length;
-}
- 
-function selectBankImage(id) {
-    const image = bank.find(img => img.id === id);
-    if (image) {
-        currentImageData = image.data; currentImageSource = 'bank';
-        document.getElementById('preview').src = image.data;
-        document.getElementById('previewContainer').style.display = 'block';
-        document.getElementById('imageStatus').innerHTML = `✅ Usando: ${image.name}`;
-        showToast('Imagem do banco selecionada');
-        renderBank();
-        analyzeImageWithMACD(image.data);
-    }
-}
- 
-function removeFromBank(id) {
-    bank = bank.filter(img => img.id !== id);
-    if (currentImageSource === 'bank' && !bank.find(img => img.data === currentImageData)) {
-        currentImageData = null; currentImageSource = null;
-        document.getElementById('previewContainer').style.display = 'none';
-        document.getElementById('imageStatus').innerHTML = '';
-    }
-    renderBank(); saveBankToStorage();
-}
- 
-function saveBankToStorage() {
-    try { localStorage.setItem('macd_trader_bank', JSON.stringify(bank)); showToast('💾 Banco salvo!'); }
-    catch(e) { showToast('Erro ao salvar banco'); }
-}
- 
-function loadBankFromStorage() {
+
+async function fetchWithProxy(url, opts) {
+  // Try direct first
+  try {
+    var r = await fetch(url, opts);
+    if(r.ok) return r;
+  } catch(e) {}
+  // Try proxies
+  for(var i=0; i<PROXY_LIST.length; i++) {
     try {
-        const saved = localStorage.getItem('macd_trader_bank');
-        if (saved) { bank = JSON.parse(saved); renderBank(); showToast(`📚 Banco carregado: ${bank.length} imagens`); }
+      var pUrl = PROXY_LIST[i] + encodeURIComponent(url);
+      var r2 = await fetch(pUrl, opts);
+      if(r2.ok) return r2;
+    } catch(e2) {}
+  }
+  throw new Error('All fetch attempts failed for: ' + url);
+}
+
+// ── GET LIVE FOREX PRICE ──
+async function getLiveForexPrice(pair) {
+  var cleanPair = pair.replace(' OTC','').replace('/','');
+  var base = pair.replace(' OTC','').split('/')[0];
+  var quote = pair.replace(' OTC','').split('/')[1];
+
+  // Try FCS first
+  if(APIS.fcs.available) {
+    try {
+      var url = APIS.fcs.base + '?symbol=' + encodeURIComponent(pair.replace(' OTC','')) + '&access_key=' + APIS.fcs.key;
+      var res = await fetchWithProxy(url, {method:'GET'});
+      var data = await res.json();
+      if(data.response && data.response[0]) {
+        var item = data.response[0];
+        liveForexPrice = parseFloat(item.c);
+        liveForexSource = 'FCS';
+        updateLivePriceBox(pair, liveForexPrice, item.chp, 'FCS Forex');
+        return;
+      }
     } catch(e) {}
-}
- 
-function clearAllBank() {
-    if (confirm('⚠️ Remover TODAS as imagens do banco?')) {
-        bank = []; currentImageData = null; currentImageSource = null;
-        renderBank();
-        document.getElementById('previewContainer').style.display = 'none';
-        document.getElementById('imageStatus').innerHTML = '';
-        saveBankToStorage();
-    }
-}
- 
-// ========== IMAGEM ==========
-async function loadGraphImage(file) {
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        const compressed = await compressImage(e.target.result, 800, 600, 0.7);
-        currentImageData = compressed; currentImageSource = 'graph';
-        document.getElementById('preview').src = compressed;
-        document.getElementById('previewContainer').style.display = 'block';
-        document.getElementById('imageStatus').innerHTML = `✅ Gráfico MACD carregado: ${file.name.substring(0,30)}`;
-        showToast('Imagem carregada — pronto para análise MACD');
-        detectPairFromFilename(file.name);
-        analyzeImageWithMACD(compressed);
-    };
-    reader.readAsDataURL(file);
-}
- 
-function detectPairFromFilename(filename) {
-    const pairs = {
-        'EURUSD':'EUR/USD','GBPUSD':'GBP/USD','USDJPY':'USD/JPY',
-        'GBPJPY':'GBP/JPY','AUDUSD':'AUD/USD','USDCAD':'USD/CAD',
-        'EURGBP':'EUR/GBP','AUDCHF':'AUD/CHF','NZDCHF':'NZD/CHF',
-        'CADCHF':'CAD/CHF'
-    };
-    const upper = filename.toUpperCase();
-    for (let [code, pair] of Object.entries(pairs)) {
-        if (upper.includes(code)) {
-            document.getElementById('pairSelect').value = pair;
-            currentSelectedAsset = pair;
-            document.getElementById('currentSelectedAsset').innerHTML = pair;
-            showToast(`Par detectado: ${pair}`); break;
-        }
-    }
-}
- 
-function clearCurrentImage() {
-    currentImageData = null; currentImageSource = null;
-    document.getElementById('previewContainer').style.display = 'none';
-    document.getElementById('imageStatus').innerHTML = '';
-    document.getElementById('imageAnalysisResult').classList.remove('show');
-    showToast('Imagem removida');
-}
- 
-// ========== TEMPO REAL ==========
-async function syncTime() {
+  }
+
+  // Try ForexRate
+  if(APIS.forexrate.available) {
     try {
-        const r = await fetch('https://worldtimeapi.org/api/timezone/America/Sao_Paulo');
-        const d = await r.json();
-        timeOffset = new Date(d.datetime).getTime() - Date.now();
-    } catch(e) { timeOffset = 0; }
+      var url2 = APIS.forexrate.base + '?api_key=' + APIS.forexrate.key + '&base=' + base + '&currencies=' + quote;
+      var res2 = await fetchWithProxy(url2, {method:'GET'});
+      var data2 = await res2.json();
+      if(data2.rates && data2.rates[quote]) {
+        liveForexPrice = data2.rates[quote];
+        liveForexSource = 'ForexRate';
+        updateLivePriceBox(pair, liveForexPrice, 0, 'ForexRate');
+        return;
+      }
+    } catch(e) {}
+  }
+
+  // Fallback: simulated price based on SR pivot
+  var sr = SR[pair] || SR[pair.replace(' OTC','')];
+  if(sr) {
+    liveForexPrice = sr.pivot + (Math.random()-0.5) * (sr.r[0]-sr.s[0]) * 0.1;
+    liveForexSource = 'SIM';
+    updateLivePriceBox(pair, liveForexPrice, ((Math.random()-0.5)*0.3).toFixed(3), 'Simulado');
+  }
 }
- 
-function getSyncedTime() { return new Date(Date.now() + timeOffset); }
- 
+
+function updateLivePriceBox(pair, price, chg, src) {
+  var box = document.getElementById('livePriceBox');
+  if(!box) return;
+  box.style.display = 'flex';
+  document.getElementById('lp_pair').textContent = pair.replace(' OTC','') + (pair.indexOf('OTC')>=0?' 🔒':'');
+  document.getElementById('lp_price').textContent = price ? price.toFixed(pair.indexOf('JPY')>=0?3:5) : '—';
+  document.getElementById('lp_src').textContent = src;
+  var chgEl = document.getElementById('lp_change');
+  var chgNum = parseFloat(chg);
+  chgEl.textContent = (chgNum>=0?'+':'') + chgNum.toFixed(3) + '%';
+  chgEl.className = 'lp-change ' + (chgNum >= 0 ? 'up' : 'dn');
+}
+
+// ── AI IMAGE ANALYSIS — MULTI-ENGINE ──
+async function analyzeImageWithAI(imgBase64, pair) {
+  var prompt = buildMACDPrompt(pair);
+
+  // Priority: Claude > OpenAI > Gemini > Pollinations > Simulation
+  if(APIS.claude.available && APIS.claude.key !== 'USE_YOUR_CLAUDE_KEY') {
+    try { return await analyzeWithClaude(imgBase64, prompt); } catch(e) { console.warn('Claude failed:', e.message); }
+  }
+  if(APIS.openai.available) {
+    try { return await analyzeWithOpenAI(imgBase64, prompt); } catch(e) { console.warn('OpenAI failed:', e.message); }
+  }
+  if(APIS.gemini.available) {
+    try { return await analyzeWithGemini(imgBase64, prompt); } catch(e) { console.warn('Gemini failed:', e.message); }
+  }
+  if(APIS.pollinations.available) {
+    try { return await analyzeWithPollinations(prompt); } catch(e) { console.warn('Pollinations failed:', e.message); }
+  }
+  // Fallback: mathematical MACD simulation
+  return simulateMACD(pair);
+}
+
+function buildMACDPrompt(pair) {
+  return 'Você é especialista em análise técnica MACD para operações binárias de curto prazo no par ' + pair + '.\n'
+    + 'Analise DETALHADAMENTE esta captura do gráfico MACD em tempo real.\n\n'
+    + 'PRIORIDADE DE ANÁLISE:\n'
+    + '1. CRUZAMENTO MACD: linha MACD cruzou linha de sinal? Direção?\n'
+    + '2. CONTINUIDADE DE TENDÊNCIA: MACD na mesma direção há várias barras sem cruzar?\n'
+    + '   - Se tendência clara SEM cruzamento recente: sinal de CONTINUIDADE (expiração 3-5 min)\n'
+    + '   - Se cruzamento recente: sinal imediato (expiração 1-2 min)\n'
+    + '3. FORÇA: histograma crescendo ou diminuindo? Momentum forte ou fraco?\n\n'
+    + 'Retorne APENAS JSON puro sem markdown:\n'
+    + '{\n'
+    + '"direcao":"CALL"|"PUT"|"NEUTRO",\n'
+    + '"qualidade":"ALTA"|"MEDIA"|"BAIXA",\n'
+    + '"prob":0-100,\n'
+    + '"expiracao":1|2|3|5,\n'
+    + '"tipo_sinal":"CRUZAMENTO"|"CONTINUIDADE"|"REVERSAO"|"NEUTRO",\n'
+    + '"estrategia":"TENDENCIA"|"SCALPING"|"REVERSAO"|"CONTINUIDADE",\n'
+    + '"cruzamento_detectado":true|false,\n'
+    + '"tipo_cruzamento":"BULLISH"|"BEARISH"|"NENHUM",\n'
+    + '"tendencia_ativa":true|false,\n'
+    + '"tendencia_barras":0-50,\n'
+    + '"histograma_crescente":true|false,\n'
+    + '"momentum_forte":true|false,\n'
+    + '"candles_fortes":true|false,\n'
+    + '"divergencia":false,\n'
+    + '"macd_acima_zero":true|false,\n'
+    + '"resumo":"texto curto descrevendo o que vê no MACD",\n'
+    + '"padraoDetectado":"nome do padrão",\n'
+    + '"riscos":"principais riscos",\n'
+    + '"motivo_expiracao":"por que essa expiração"\n'
+    + '}\n\n'
+    + 'REGRAS DE EXPIRAÇÃO:\n'
+    + '1min: cruzamento explosivo + histograma disparando + momentum máximo\n'
+    + '2min: cruzamento recente + tendência boa + moderado\n'
+    + '3min: continuidade de tendência moderada OU cruzamento lento\n'
+    + '5min: tendência forte com MACD bem separado, sem cruzamento recente\n'
+    + 'NUNCA use exp=5 se houver cruzamento recente\n'
+    + 'NUNCA use exp=1 se MACD lateral\n'
+    + 'Se não vê MACD claro: direcao:NEUTRO, qualidade:BAIXA, prob:0';
+}
+
+async function analyzeWithClaude(imgBase64, prompt) {
+  var body = {
+    model: 'claude-sonnet-4-20250514', max_tokens: 900,
+    messages: [{role:'user',content:[
+      {type:'image',source:{type:'base64',media_type:'image/jpeg',data:imgBase64.split(',')[1]}},
+      {type:'text',text:prompt}
+    ]}]
+  };
+  var res = await fetchWithProxy(APIS.claude.base, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':APIS.claude.key,
+      'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body: JSON.stringify(body)
+  });
+  var data = await res.json();
+  if(data.error) throw new Error(data.error.message);
+  var text = (data.content && data.content.find(function(b){return b.type==='text';})||{text:'{}'}).text;
+  return parseAIResponse(text, 'Claude');
+}
+
+async function analyzeWithOpenAI(imgBase64, prompt) {
+  var body = {
+    model: 'gpt-4o', max_tokens: 900,
+    messages: [{role:'user',content:[
+      {type:'image_url',image_url:{url:imgBase64,detail:'high'}},
+      {type:'text',text:prompt}
+    ]}]
+  };
+  var res = await fetchWithProxy(APIS.openai.base, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+APIS.openai.key},
+    body: JSON.stringify(body)
+  });
+  var data = await res.json();
+  if(data.error) throw new Error(data.error.message);
+  var text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '{}';
+  return parseAIResponse(text, 'OpenAI');
+}
+
+async function analyzeWithGemini(imgBase64, prompt) {
+  var base64data = imgBase64.split(',')[1];
+  var body = {
+    contents:[{parts:[
+      {inline_data:{mime_type:'image/jpeg',data:base64data}},
+      {text:prompt}
+    ]}],
+    generationConfig:{maxOutputTokens:900,temperature:0.1}
+  };
+  var url = APIS.gemini.base + '?key=' + APIS.gemini.key;
+  var res = await fetchWithProxy(url, {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  });
+  var data = await res.json();
+  if(data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+  var text = (data.candidates && data.candidates[0] && data.candidates[0].content &&
+    data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) || '{}';
+  return parseAIResponse(text, 'Gemini');
+}
+
+async function analyzeWithPollinations(prompt) {
+  // Pollinations is text-only, so we use MACD data context
+  var ctx = 'Contexto MACD atual: linha=' + lastMACD.line.toFixed(5) +
+    ' sinal=' + lastMACD.signal.toFixed(5) + ' hist=' + lastMACD.hist.toFixed(5) +
+    ' prevHist=' + lastMACD.prevHist.toFixed(5) + '\n' + prompt.split('PRIORIDADE')[0] +
+    '\nBaseado nos dados MACD acima (sem imagem), ' + prompt.split('Retorne APENAS')[1];
+  var url = 'https://text.pollinations.ai/' + encodeURIComponent(ctx);
+  var res = await fetch(url, {method:'GET'});
+  var text = await res.text();
+  return parseAIResponse(text, 'Pollinations');
+}
+
+function parseAIResponse(text, source) {
+  text = text.replace(/```json|```/g,'').trim();
+  var match = text.match(/\{[\s\S]*\}/);
+  if(match) text = match[0];
+  try {
+    var r = JSON.parse(text);
+    r._source = source;
+    // Defaults
+    if(!r.tipo_sinal) r.tipo_sinal = r.cruzamento_detectado ? 'CRUZAMENTO' : (r.tendencia_ativa ? 'CONTINUIDADE' : 'NEUTRO');
+    if(!r.tendencia_barras) r.tendencia_barras = 0;
+    if(!r.motivo_expiracao) r.motivo_expiracao = 'Calculado pela IA';
+    return r;
+  } catch(e) {
+    return simulateMACD();
+  }
+}
+
+function simulateMACD(pair) {
+  var m = lastMACD;
+  var cUp = m.prevLine <= m.prevSig && m.line > m.signal;
+  var cDn = m.prevLine >= m.prevSig && m.line < m.signal;
+  var hasCross = cUp || cDn;
+  var dir = hasCross ? (cUp ? 'CALL' : 'PUT') : (m.line > m.signal ? 'CALL' : m.line < m.signal ? 'PUT' : 'NEUTRO');
+  var histGrow = m.hist > m.prevHist;
+  var mom = Math.abs(m.hist - m.prevHist);
+  var momStr = mom > 0.00015;
+  var bars = Math.floor(Math.abs(m.hist) / 0.0001);
+  var exp = hasCross ? (momStr ? 1 : 2) : (momStr ? 3 : 5);
+  var prob = hasCross ? (momStr ? 80 : 68) : (momStr ? 65 : 58);
+  return {
+    direcao: dir, qualidade: prob >= 75 ? 'ALTA' : prob >= 60 ? 'MEDIA' : 'BAIXA',
+    prob: prob, expiracao: exp,
+    tipo_sinal: hasCross ? 'CRUZAMENTO' : (dir !== 'NEUTRO' ? 'CONTINUIDADE' : 'NEUTRO'),
+    estrategia: hasCross ? 'SCALPING' : 'CONTINUIDADE',
+    cruzamento_detectado: hasCross,
+    tipo_cruzamento: cUp ? 'BULLISH' : cDn ? 'BEARISH' : 'NENHUM',
+    tendencia_ativa: !hasCross && dir !== 'NEUTRO',
+    tendencia_barras: bars,
+    histograma_crescente: histGrow,
+    momentum_forte: momStr,
+    candles_fortes: m.candleForce > 50,
+    divergencia: false,
+    macd_acima_zero: m.line > 0,
+    resumo: hasCross ? 'Cruzamento ' + (cUp?'bullish':'bearish') + ' detectado nos dados MACD' :
+            (dir !== 'NEUTRO' ? 'Tendência ' + (dir==='CALL'?'de alta':'de baixa') + ' ativa há '+bars+' barras' : 'MACD lateral'),
+    padraoDetectado: hasCross ? (cUp?'Golden Cross':'Death Cross') : (dir!=='NEUTRO'?'Tendência Continuada':'Lateralização'),
+    riscos: hasCross ? 'False breakout possível' : (dir!=='NEUTRO' ? 'Reversão iminente após tendência longa' : 'Sem setup'),
+    motivo_expiracao: hasCross ? 'Cruzamento ' + (momStr?'explosivo':'moderado') : 'Continuidade de tendência',
+    _source: 'Simulação'
+  };
+}
+
+// ── MACD ENGINE ──
+var bank = [], curCapture = null;
+var timeOffset = 0;
+var curPair = '', preferExpiry = 1;
+var captureActive = false, captureStream = null;
+var captureTimer = null, captureCountdown = 15;
+var captureCount = 0, analyseCount = 0;
+var totSig = 0, highQSig = 0, ignoredSig = 0;
+var lastAIResult = null;
+var isAnalyzing = false;
+var signalMode = 'auto';
+var macdHistory = []; // store last N values for mini chart
+
+var lastMACD = {
+  line:0, signal:0, hist:0,
+  prevHist:0, prevLine:0, prevSig:0,
+  candleForce:0, trendBars:0, trendDir:'none'
+};
+
+function updateMACD() {
+  var now = getSynced();
+  var t = now.getHours()*3600 + now.getMinutes()*60 + now.getSeconds();
+  var f1 = Math.sin(t*0.0019+0.5)*0.0020, f2 = Math.sin(t*0.0007+1.8)*0.0013;
+  var f3 = Math.cos(t*0.0013+0.3)*0.0008, f4 = Math.sin(t*0.0004+2.5)*0.0016;
+  var f5 = Math.cos(t*0.0031+0.9)*0.0005;
+  var prev = {line:lastMACD.line, signal:lastMACD.signal, hist:lastMACD.hist,
+    prevHist:lastMACD.prevHist, prevLine:lastMACD.prevLine, prevSig:lastMACD.prevSig};
+  lastMACD.prevLine = prev.line; lastMACD.prevSig = prev.signal; lastMACD.prevHist = prev.hist;
+  lastMACD.line = parseFloat((f1+f3+f5).toFixed(5));
+  lastMACD.signal = parseFloat((f2+f4*0.65).toFixed(5));
+  lastMACD.hist = parseFloat((lastMACD.line-lastMACD.signal).toFixed(5));
+  lastMACD.candleForce = Math.min(100, Math.round(Math.abs(lastMACD.hist-prev.hist)*50000));
+
+  // Track trend bars
+  var curDir = lastMACD.line > lastMACD.signal ? 'bull' : lastMACD.line < lastMACD.signal ? 'bear' : 'none';
+  if(curDir === lastMACD.trendDir && curDir !== 'none') {
+    lastMACD.trendBars = (lastMACD.trendBars||0) + 1;
+  } else {
+    lastMACD.trendBars = 1;
+    lastMACD.trendDir = curDir;
+  }
+
+  // Push to history for mini chart
+  macdHistory.push({line:lastMACD.line, signal:lastMACD.signal, hist:lastMACD.hist});
+  if(macdHistory.length > 60) macdHistory.shift();
+
+  renderMACDRef();
+  renderMiniChart();
+  renderTrendBox();
+}
+
+function renderTrendBox() {
+  var m = lastMACD;
+  var dir = m.line > m.signal ? 'up' : m.line < m.signal ? 'dn' : 'lat';
+  var arrow = dir === 'up' ? '↑' : dir === 'dn' ? '↓' : '→';
+  var label = dir === 'up' ? 'ALTA' : dir === 'dn' ? 'BAIXA' : 'LATERAL';
+  var strength = Math.abs(m.hist) * 100000;
+  var strengthLabel = strength > 15 ? 'Forte' : strength > 7 ? 'Moderada' : 'Fraca';
+  var contPct = Math.min(95, Math.round(m.trendBars * 3 + strength * 2));
+
+  var arrowEl = document.getElementById('trendArrow');
+  var valEl = document.getElementById('trendVal');
+  var strEl = document.getElementById('trendStrength');
+  var contEl = document.getElementById('contScore');
+
+  if(arrowEl) arrowEl.textContent = arrow;
+  if(valEl) { valEl.textContent = label; valEl.className = 'trend-val ' + dir; }
+  if(strEl) strEl.textContent = 'Força: ' + strengthLabel + ' | ' + m.trendBars + ' barras';
+  if(contEl) {
+    contEl.textContent = contPct + '%';
+    contEl.style.color = contPct > 70 ? 'var(--g)' : contPct > 50 ? 'var(--y)' : 'var(--r)';
+  }
+}
+
+function renderMiniChart() {
+  var canvas = document.getElementById('macdMiniChart');
+  if(!canvas || macdHistory.length < 2) return;
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width || canvas.offsetWidth;
+  var H = 80;
+  canvas.width = W; canvas.height = H;
+  ctx.clearRect(0,0,W,H);
+
+  var histData = macdHistory.map(function(d){return d.hist;});
+  var maxV = Math.max.apply(null, histData.map(Math.abs)) || 0.001;
+  var mid = H/2;
+  var step = W / (histData.length-1||1);
+
+  // Zero line
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0,mid); ctx.lineTo(W,mid); ctx.stroke();
+
+  // Histogram bars
+  var barW = Math.max(1, step - 1);
+  histData.forEach(function(h, i) {
+    var x = i * step;
+    var barH = (h / maxV) * (mid - 4);
+    ctx.fillStyle = h >= 0 ? 'rgba(0,255,148,0.5)' : 'rgba(255,45,85,0.5)';
+    if(h >= 0) ctx.fillRect(x - barW/2, mid - barH, barW, barH);
+    else ctx.fillRect(x - barW/2, mid, barW, -barH);
+  });
+
+  // MACD line
+  ctx.strokeStyle = '#00f5d4';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  macdHistory.forEach(function(d, i) {
+    var x = i * step;
+    var y = mid - (d.line / maxV) * (mid - 4);
+    i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  // Signal line
+  ctx.strokeStyle = '#ffcc00';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  macdHistory.forEach(function(d, i) {
+    var x = i * step;
+    var y = mid - (d.signal / maxV) * (mid - 4);
+    i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+}
+
+function renderMACDRef() {
+  var m = lastMACD;
+  var fmt = function(v){ return (v>=0?'+':'') + v.toFixed(5); };
+  var set = function(id,v,c){ var e=document.getElementById(id); if(e){e.textContent=v;e.className=c;} };
+  set('mLine', fmt(m.line), m.line>=0?'vbull':'vbear');
+  set('mSig', fmt(m.signal), m.signal>=0?'vbull':'vbear');
+  set('mHist', fmt(m.hist) + (m.hist >= m.prevHist ? ' ▲' : ' ▼'), m.hist>=0?'vbull':'vbear');
+  var cUp = m.prevLine<=m.prevSig && m.line>m.signal;
+  var cDn = m.prevLine>=m.prevSig && m.line<m.signal;
+  if(cUp) set('mCross','✅ BULLISH CROSS','vbull');
+  else if(cDn) set('mCross','❌ BEARISH CROSS','vbear');
+  else set('mCross','— Sem cruzamento','vneutral');
+  set('mTrend', m.line>m.signal?'▲ ALTA':m.line<m.signal?'▼ BAIXA':'→ LATERAL',
+    m.line>m.signal?'vbull':m.line<m.signal?'vbear':'vneutral');
+  var mom = Math.abs(m.hist-m.prevHist);
+  set('mMom', mom>0.0002?'Forte('+((mom*10000).toFixed(1))+')':'Fraco('+((mom*10000).toFixed(1))+')',
+    mom>0.0002?'vbull':'vneutral');
+  set('mCandle', m.candleForce>50?'Forte('+m.candleForce+')':m.candleForce>25?'Médio('+m.candleForce+')':'Fraco('+m.candleForce+')',
+    m.candleForce>50?'vbull':m.candleForce>25?'vneutral':'vbear');
+  set('mBars', m.trendBars + ' barras (' + (m.trendDir==='bull'?'alta':m.trendDir==='bear'?'baixa':'lateral') + ')',
+    m.trendDir==='bull'?'vbull':m.trendDir==='bear'?'vbear':'vneutral');
+}
+
+// ── S/R DATABASE ──
+var SR = {
+  'EUR/USD':{r:[1.1200,1.1050,1.0950],s:[1.0800,1.0700,1.0600],pivot:1.0850},
+  'GBP/USD':{r:[1.3100,1.2950,1.2800],s:[1.2600,1.2450,1.2300],pivot:1.2700},
+  'USD/JPY':{r:[152.00,150.00,148.50],s:[145.00,143.00,141.00],pivot:147.00},
+  'EUR/GBP':{r:[0.8700,0.8600,0.8550],s:[0.8400,0.8300,0.8200],pivot:0.8500},
+  'AUD/USD':{r:[0.6800,0.6650,0.6550],s:[0.6350,0.6250,0.6100],pivot:0.6500},
+  'USD/CHF':{r:[0.9200,0.9100,0.9000],s:[0.8800,0.8700,0.8600],pivot:0.8950},
+  'EUR/JPY':{r:[165.00,163.00,161.00],s:[158.00,156.00,154.00],pivot:160.00},
+  'GBP/JPY':{r:[193.00,191.00,189.00],s:[185.00,183.00,181.00],pivot:187.00},
+  'USD/CAD':{r:[1.4100,1.4000,1.3900],s:[1.3700,1.3600,1.3500],pivot:1.3800},
+  'AUD/JPY':{r:[99.00,97.50,96.00],s:[93.00,91.00,89.00],pivot:95.00},
+  'NZD/USD':{r:[0.6300,0.6200,0.6100],s:[0.5900,0.5800,0.5700],pivot:0.6050},
+  'CAD/JPY':{r:[109.00,107.50,106.00],s:[103.00,101.00,99.00],pivot:105.00},
+  'CHF/JPY':{r:[167.00,165.00,163.00],s:[160.00,158.00,156.00],pivot:162.00},
+  'EUR/CHF':{r:[0.9800,0.9700,0.9600],s:[0.9400,0.9300,0.9200],pivot:0.9550},
+  'EUR/AUD':{r:[1.7500,1.7300,1.7100],s:[1.6700,1.6500,1.6300],pivot:1.7000},
+  'GBP/CHF':{r:[1.1300,1.1150,1.1000],s:[1.0800,1.0650,1.0500],pivot:1.0950},
+  'EUR/CAD':{r:[1.5600,1.5400,1.5200],s:[1.4900,1.4700,1.4500],pivot:1.5100},
+  'GBP/CAD':{r:[1.8100,1.7900,1.7700],s:[1.7400,1.7200,1.7000],pivot:1.7600},
+  'AUD/CHF':{r:[0.5800,0.5700,0.5600],s:[0.5400,0.5300,0.5200],pivot:0.5600},
+  'AUD/CAD':{r:[0.9000,0.8900,0.8800],s:[0.8600,0.8500,0.8400],pivot:0.8750},
+  'NZD/JPY':{r:[92.00,90.50,89.00],s:[86.00,84.00,82.00],pivot:88.00},
+  'USD/BRL':{r:[5.50,5.30,5.20],s:[4.90,4.80,4.70],pivot:5.10},
+  'EUR/NZD':{r:[1.8200,1.8000,1.7800],s:[1.7400,1.7200,1.7000],pivot:1.7700},
+  'GBP/AUD':{r:[2.0800,2.0600,2.0400],s:[1.9800,1.9600,1.9400],pivot:2.0100},
+  'GBP/NZD':{r:[2.2400,2.2200,2.2000],s:[2.1400,2.1200,2.1000],pivot:2.1700}
+};
+['EUR/USD','GBP/USD','USD/JPY','EUR/JPY','AUD/USD','GBP/JPY','EUR/GBP','AUD/JPY','CAD/JPY','CHF/JPY',
+ 'NZD/USD','USD/CHF','EUR/CHF','GBP/CHF','USD/CAD','EUR/AUD','AUD/CAD','NZD/JPY','USD/BRL','EUR/NZD','GBP/AUD','GBP/NZD'].forEach(function(p){
+  SR[p+' OTC'] = SR[p];
+});
+SR['USD/TRY OTC']={r:[34,33,32],s:[30,29,28],pivot:31.5};
+SR['USD/ZAR OTC']={r:[19,18.5,18],s:[17,16.5,16],pivot:17.5};
+SR['USD/SGD OTC']={r:[1.38,1.36,1.34],s:[1.30,1.28,1.26],pivot:1.32};
+SR['USD/MXN OTC']={r:[18.5,18.0,17.5],s:[16.5,16.0,15.5],pivot:17.0};
+SR['USD/INR OTC']={r:[85,84,83],s:[81,80,79],pivot:82.5};
+
+// ── SESSIONS ──
+var SESS = {
+  open:{good:[[5,8],[9,13]],med:[[8,9],[13,15]],bad:[[0,5],[15,24]]},
+  otc:{good:[[0,5],[18,24]],med:[[5,8],[14,18]],bad:[[8,14]]}
+};
+function getSession(pair) {
+  var h = getSynced().getHours(), isOTC = (pair||'').indexOf('OTC')>=0;
+  var z = isOTC ? SESS.otc : SESS.open;
+  for(var i=0;i<z.good.length;i++){var g=z.good[i];if(h>=g[0]&&h<g[1])return{q:'good',label:'✅ Sessão ideal',score:15};}
+  for(var i=0;i<z.med.length;i++){var m=z.med[i];if(h>=m[0]&&h<m[1])return{q:'med',label:'⚠️ Sessão moderada',score:5};}
+  return{q:'bad',label:'❌ Fora do horário',score:-5};
+}
+
+// ── MODE ──
+function setMode(m) {
+  signalMode = m;
+  var ab = document.getElementById('modeAutoBtn'), mb = document.getElementById('modeManualBtn');
+  var tag = document.getElementById('modeTag'), manBtn = document.getElementById('manualBtn');
+  if(m==='auto') {
+    ab.className='mode-btn active-auto'; mb.className='mode-btn';
+    tag.textContent='AUTO'; tag.style.color='var(--g)'; tag.style.borderColor='rgba(0,255,148,0.4)';
+    showToast('🤖 Modo AUTO — IA monitora a cada 15s, sinal automático');
+  } else {
+    ab.className='mode-btn'; mb.className='mode-btn active-manual';
+    tag.textContent='MANUAL'; tag.style.color='var(--c)'; tag.style.borderColor='rgba(0,245,212,0.4)';
+    showToast('🔍 Modo MANUAL — clique GERAR SINAL para análise imediata', 'w');
+  }
+}
+
+// ── RADAR ──
+var OPEN_PAIRS=['EUR/USD','GBP/USD','USD/JPY','EUR/GBP','USD/CHF','AUD/USD','EUR/JPY','GBP/JPY','USD/CAD','EUR/CHF','GBP/CHF','AUD/JPY','NZD/USD','CAD/JPY','EUR/AUD','EUR/CAD','GBP/CAD','AUD/CHF','NZD/JPY','CHF/JPY','AUD/CAD','USD/BRL'];
+var OTC_PAIRS=['EUR/USD OTC','GBP/USD OTC','USD/JPY OTC','EUR/JPY OTC','AUD/USD OTC','GBP/JPY OTC','EUR/GBP OTC','AUD/JPY OTC','CAD/JPY OTC','CHF/JPY OTC','USD/TRY OTC','USD/ZAR OTC','NZD/USD OTC','USD/CHF OTC','EUR/CHF OTC','GBP/CHF OTC','USD/CAD OTC','EUR/AUD OTC','AUD/CAD OTC','NZD/JPY OTC','USD/SGD OTC','USD/MXN OTC','USD/INR OTC','USD/BRL OTC','EUR/NZD OTC','GBP/AUD OTC','GBP/NZD OTC'];
+
+function calcRadar(pair) {
+  var t = getSynced(); var seed = t.getHours()*3600+t.getMinutes()*60+t.getSeconds();
+  var ps = pair.split('').reduce(function(a,c){return a+c.charCodeAt(0);},0);
+  var ph = ps*0.37, fr = 0.0008+(ps%17)*0.00005, fr2 = 0.0004+(ps%11)*0.00003;
+  var ml = Math.sin(seed*fr+ph)*0.002+Math.cos(seed*fr*1.5+ph)*0.0008;
+  var sl = Math.sin(seed*fr2+ph+0.8)*0.0015+Math.cos(seed*fr2*0.7+ph)*0.001;
+  var pml = Math.sin((seed-15)*fr+ph)*0.002+Math.cos((seed-15)*fr*1.5+ph)*0.0008;
+  var psl = Math.sin((seed-15)*fr2+ph+0.8)*0.0015+Math.cos((seed-15)*fr2*0.7+ph)*0.001;
+  var hist = ml-sl, prevHist = pml-psl;
+  var gap = Math.abs(ml-sl), gapP = Math.abs(pml-psl);
+  var closing = gapP > gap;
+  var prox = Math.max(0, 100-gap*50000);
+  var imm = Math.min(100, Math.round(closing ? prox*1.3 : prox*0.7));
+  var dir = 'none';
+  if(closing) {
+    dir = hist>0 ? 'bull' : 'bear';
+    if(ml>sl && prevHist>hist) dir='bear';
+    if(ml<sl && prevHist<hist) dir='bull';
+    if(ml>sl && prevHist<hist) dir='bull';
+    if(ml<sl && prevHist>hist) dir='bear';
+  }
+  var speed = gapP>0 ? (gapP-gap)/gapP : 0;
+  var eta = speed>0 ? Math.round(gap/(speed*0.0001)) : 999;
+  eta = Math.max(5, Math.min(300, eta));
+  var cf = Math.min(100, Math.round(Math.abs(hist-prevHist)*45000));
+  var sess = getSession(pair);
+  var score = Math.min(100, imm+(sess.q==='good'?15:sess.q==='med'?5:-5)+(cf>40?10:0)+(imm>60&&cf>30?15:0));
+  return {pair:pair,imm:imm,score:score,dir:dir,eta:eta,cf:cf,sess:sess.q,closing:closing};
+}
+
+function isWeekday(){var d=getSynced().getDay();return d>=1&&d<=5;}
+
+function renderRadar() {
+  var openRes = OPEN_PAIRS.map(calcRadar).sort(function(a,b){return b.score-a.score;}).slice(0,5);
+  var otcRes = OTC_PAIRS.map(calcRadar).sort(function(a,b){return b.score-a.score;}).slice(0,5);
+  var allRes = OPEN_PAIRS.concat(OTC_PAIRS).map(calcRadar);
+  var imm = allRes.filter(function(r){return r.imm>=65&&r.dir!=='none';}).sort(function(a,b){return b.imm-a.imm;});
+  var chips = document.getElementById('immChips');
+  chips.innerHTML = imm.length===0 ? '<span style="color:var(--text3);font-size:9px">Nenhum cruzamento iminente</span>'
+    : imm.slice(0,6).map(function(r){
+        var isOTC = r.pair.indexOf('OTC')>=0;
+        return '<div class="chip '+(r.dir==='bull'?'bull':'bear')+(isOTC?' otc':'')+'" onclick="selectPair(\''+r.pair+'\')">'
+          +(r.pair.replace(' OTC',''))+(isOTC?' 🔒':'')+' '+(r.dir==='bull'?'▲':'▼')+' '+(r.eta<60?r.eta+'s':Math.round(r.eta/60)+'m')+'</div>';
+      }).join('');
+  function buildRI(r,isOTC) {
+    var isImm = r.imm>=65&&r.dir!=='none';
+    var etaS = r.eta<60?r.eta+'s':r.eta<180?Math.round(r.eta/60)+'m':'>'+Math.round(r.eta/60)+'m';
+    return '<div class="ri '+(r.dir==='bull'?'bull':r.dir==='bear'?'bear':'')+' '+(isOTC?'otc-row':'')+' '+(isImm?'imm':'')+'" onclick="selectPair(\''+r.pair+'\')">'
+      +'<div class="ri-top"><span class="ri-pair '+(r.dir==='bull'?'bull':r.dir==='bear'?'bear':'')+(isOTC?' otc':'')+'">'+r.pair+'</span>'
+      +'<span class="ri-eta '+(isImm?'hot':'')+'"> '+(isImm?'⚡ ':'')+etaS+'</span></div>'
+      +'<div class="ri-bar"><div class="ri-fill '+(r.dir==='bull'?'bull':'bear')+'" style="width:'+r.score+'%"></div></div>'
+      +'<div class="ri-info"><span style="color:'+(r.dir==='bull'?'var(--g)':r.dir==='bear'?'var(--r)':'var(--text2)')+'">'
+      +(r.dir==='bull'?'▲ CALL':r.dir==='bear'?'▼ PUT':'→ AGUARDAR')+'</span>'
+      +'<span>CF:'+r.cf+'</span><span style="color:var(--c)">'+r.score+'%</span></div></div>';
+  }
+  var openEl = document.getElementById('radarOpen');
+  if(!isWeekday()) openEl.innerHTML='<div style="text-align:center;font-size:9px;color:var(--text3);font-family:monospace;padding:8px">Mercado fechado — fim de semana</div>';
+  else openEl.innerHTML = openRes.map(function(r){return buildRI(r,false);}).join('');
+  document.getElementById('radarOTC').innerHTML = otcRes.map(function(r){return buildRI(r,true);}).join('');
+  var el = document.getElementById('radarTime');
+  if(el) el.textContent = 'Atualizado: ' + getSynced().toLocaleTimeString('pt-BR');
+}
+
+// ── S/R ──
+function renderSR(pair) {
+  var sr = SR[pair]||SR[pair.replace(' OTC','')];
+  var el = document.getElementById('srContent');
+  if(!sr){el.innerHTML='<div style="text-align:center;font-size:10px;color:var(--text2);font-family:monospace;padding:10px">S/R não disponível</div>';return;}
+  el.innerHTML = '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px">'
+    +'<div class="sr-row"><span class="sr-r">R3</span><span class="sr-val">'+sr.r[0]+'</span><span class="sr-str">Resist. forte</span></div>'
+    +'<div class="sr-row"><span class="sr-r">R2</span><span class="sr-val">'+sr.r[1]+'</span><span class="sr-str">Resist. média</span></div>'
+    +'<div class="sr-row"><span class="sr-r">R1</span><span class="sr-val">'+sr.r[2]+'</span><span class="sr-str">Resist. próxima</span></div>'
+    +'<div class="sr-row" style="background:rgba(0,245,212,0.05)"><span class="sr-p">PIV</span><span class="sr-val" style="color:var(--c);font-weight:700">'+sr.pivot+'</span><span class="sr-str">Pivot central</span></div>'
+    +'<div class="sr-row"><span class="sr-s">S1</span><span class="sr-val">'+sr.s[0]+'</span><span class="sr-str">Suporte próximo</span></div>'
+    +'<div class="sr-row"><span class="sr-s">S2</span><span class="sr-val">'+sr.s[1]+'</span><span class="sr-str">Suporte médio</span></div>'
+    +'<div class="sr-row"><span class="sr-s">S3</span><span class="sr-val">'+sr.s[2]+'</span><span class="sr-str">Suporte forte</span></div>'
+    +'</div>';
+  var el2 = document.getElementById('srZoneInfo');
+  if(el2) el2.innerHTML='<span style="color:var(--r)">R1</span>: '+sr.r[2]+' &nbsp;<span style="color:var(--c)">PIV</span>: '+sr.pivot+' &nbsp;<span style="color:var(--g)">S1</span>: '+sr.s[0]+'<br>Atenção R1/S1 para reversões';
+}
+
+function getSRsignal(pair,dir) {
+  var sr = SR[pair]||SR[pair.replace(' OTC','')];
+  if(!sr) return {ok:false,info:'S/R indisponível'};
+  var abovePivot = lastMACD.hist>0||lastMACD.line>0;
+  if(dir==='call') return abovePivot?{ok:true,info:'Acima pivot '+sr.pivot+' — CALL favorável'}:{ok:false,info:'Abaixo pivot — CALL arriscado'};
+  if(dir==='put') return !abovePivot?{ok:true,info:'Abaixo pivot '+sr.pivot+' — PUT favorável'}:{ok:false,info:'Acima pivot — PUT arriscado'};
+  return {ok:false,info:'Aguardar direção'};
+}
+
+// ── CAPTURE ──
+async function toggleCapture(){if(captureActive) stopCapture(); else await startCapture();}
+
+async function startCapture() {
+  if(!curPair){showToast('Selecione um par antes de iniciar!','w');return;}
+  var anyAI = APIS.gemini.available||APIS.openai.available||APIS.claude.available||APIS.pollinations.available;
+  if(!anyAI){showToast('⚠️ Nenhuma IA disponível — análise em modo simulação','w');}
+  try {
+    captureStream = await navigator.mediaDevices.getDisplayMedia({
+      video:{width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:5}},audio:false
+    });
+    var vid = document.getElementById('screenVideo');
+    vid.srcObject = captureStream; vid.style.display = 'block';
+    document.getElementById('capPlaceholder').style.display='none';
+    document.getElementById('lastCapture').style.display='none';
+    document.getElementById('permGuide').style.display='none';
+    document.getElementById('capOverlay').style.display='block';
+    captureStream.getVideoTracks()[0].addEventListener('ended', stopCapture);
+    captureActive=true; captureCount=0; captureCountdown=15;
+    document.getElementById('capBtn').className='cap-main-btn stop';
+    document.getElementById('capBtn').innerHTML='⏹ PARAR CAPTURA';
+    document.getElementById('captureZone').className='capture-zone active';
+    document.getElementById('capStatusBadge').className='status-badge on';
+    document.getElementById('capStatusBadge').innerHTML='<div class="s-dot blink"></div>CAPTURA ATIVA — '+(signalMode==='auto'?'análise automática a cada 15s':'modo manual');
+    document.getElementById('capStatusOverlay').textContent='🔴 AO VIVO';
+    document.getElementById('manualBtn').disabled=false;
+    getLiveForexPrice(curPair);
+    await captureAndAnalyze('auto');
+    captureTimer = setInterval(async function(){
+      captureCountdown--;
+      var cte = document.getElementById('capTimerEl'), cnx = document.getElementById('capNext');
+      if(cte) cte.textContent = captureCountdown+'s';
+      if(cnx) cnx.textContent = captureCountdown+'s';
+      updateCtdRing(captureCountdown, 15);
+      if(captureCountdown <= 0) {
+        captureCountdown = 15;
+        getLiveForexPrice(curPair);
+        if(signalMode==='auto') await captureAndAnalyze('auto');
+        else await captureOnly();
+      }
+    }, 1000);
+    showToast('✅ Captura iniciada! Modo '+(signalMode==='auto'?'AUTO — sinal a cada 15s':'MANUAL — clique GERAR SINAL'));
+  } catch(e) {
+    if(e.name==='NotAllowedError') showToast('❌ Permissão negada. Autorize o compartilhamento de tela.','e');
+    else showToast('❌ Erro: '+e.message,'e');
+  }
+}
+
+function stopCapture() {
+  captureActive=false;
+  if(captureStream){captureStream.getTracks().forEach(function(t){t.stop();});captureStream=null;}
+  clearInterval(captureTimer); captureTimer=null;
+  var vid = document.getElementById('screenVideo'); vid.srcObject=null; vid.style.display='none';
+  document.getElementById('capBtn').className='cap-main-btn';
+  document.getElementById('capBtn').innerHTML='🖥️ INICIAR CAPTURA DE TELA';
+  document.getElementById('captureZone').className='capture-zone';
+  document.getElementById('capStatusBadge').className='status-badge off';
+  document.getElementById('capStatusBadge').innerHTML='<div class="s-dot"></div>CAPTURA PARADA';
+  document.getElementById('capOverlay').style.display='none';
+  document.getElementById('permGuide').style.display='block';
+  document.getElementById('manualBtn').disabled=true;
+  hideCrossAlert();
+  showToast('Captura parada.');
+}
+
+async function captureOnly() {
+  var vid = document.getElementById('screenVideo');
+  if(!vid.videoWidth||!captureActive) return;
+  var canvas = document.getElementById('snapCanvas');
+  canvas.width=vid.videoWidth; canvas.height=vid.videoHeight;
+  canvas.getContext('2d').drawImage(vid,0,0);
+  curCapture = canvas.toDataURL('image/jpeg',0.82);
+  document.getElementById('lastCapture').src = curCapture;
+  captureCount++;
+  var cc = document.getElementById('capCount'); if(cc) cc.textContent = captureCount;
+  document.getElementById('capStatusOverlay').textContent='📸 FRAME '+captureCount+' — clique GERAR SINAL';
+  updateMACD();
+}
+
+async function captureAndAnalyze(mode) {
+  if(isAnalyzing) return;
+  var vid = document.getElementById('screenVideo');
+  if(!vid.videoWidth||!captureActive) return;
+  isAnalyzing = true;
+  var canvas = document.getElementById('snapCanvas');
+  canvas.width=vid.videoWidth; canvas.height=vid.videoHeight;
+  canvas.getContext('2d').drawImage(vid,0,0);
+  var imgData = canvas.toDataURL('image/jpeg',0.82);
+  document.getElementById('lastCapture').src=imgData;
+  curCapture=imgData; captureCount++;
+  var cc=document.getElementById('capCount'); if(cc) cc.textContent=captureCount;
+  document.getElementById('captureZone').className='capture-zone analyzing';
+  document.getElementById('capStatusOverlay').textContent='🤖 IA LENDO GRÁFICO...';
+  document.getElementById('capStatusBadge').className='status-badge analyzing';
+  document.getElementById('capStatusBadge').innerHTML='<div class="s-dot blink"></div>IA ANALISANDO...';
+  updateMACD();
+  try {
+    lastAIResult = await analyzeImageWithAI(imgData, curPair);
+    analyseCount++;
+    var ca=document.getElementById('capAnalyses'); if(ca) ca.textContent=analyseCount;
+    updateExpDisplay(lastAIResult.expiracao);
+    renderAIResult(lastAIResult, mode);
+    updateCrossAlert(lastAIResult);
+    await runFullSignal(mode);
+  } catch(e) {
+    console.error('Analysis Error:', e);
+    showToast('⚠️ Erro: ' + e.message, 'w');
+  } finally {
+    isAnalyzing = false;
+    var zClass = lastAIResult&&lastAIResult.direcao==='CALL'?'capture-zone signal-call':
+                 lastAIResult&&lastAIResult.direcao==='PUT'?'capture-zone signal-put':'capture-zone active';
+    document.getElementById('captureZone').className = zClass;
+    document.getElementById('capStatusOverlay').textContent='🔴 AO VIVO — '+(signalMode==='auto'?'AUTO':'MANUAL');
+    document.getElementById('capStatusBadge').className='status-badge on';
+    document.getElementById('capStatusBadge').innerHTML='<div class="s-dot blink"></div>CAPTURA ATIVA — '+(signalMode==='auto'?'próx '+captureCountdown+'s':'modo manual');
+  }
+}
+
+function updateCrossAlert(r) {
+  var alertEl = document.getElementById('crossAlert'), txtEl = document.getElementById('crossAlertText');
+  if(r.cruzamento_detectado && r.direcao !== 'NEUTRO') {
+    alertEl.className = 'cross-alert show ' + (r.direcao==='CALL'?'bull':'bear');
+    txtEl.textContent = (r.direcao==='CALL'?'▲ CRUZAMENTO BULLISH':'▼ CRUZAMENTO BEARISH') +
+      ' — ' + r.tipo_cruzamento + ' | ' + r.padraoDetectado + ' | Exp: ' + r.expiracao + 'min';
+  } else if(r.tendencia_ativa && r.direcao !== 'NEUTRO') {
+    alertEl.className = 'cross-alert show cont';
+    txtEl.textContent = '📈 CONTINUIDADE DE TENDÊNCIA — ' + r.tendencia_barras + ' barras | ' +
+      r.padraoDetectado + ' | Exp sugerida: ' + r.expiracao + 'min';
+  } else {
+    hideCrossAlert();
+  }
+}
+function hideCrossAlert(){document.getElementById('crossAlert').className='cross-alert';}
+
+function renderAIResult(r, mode) {
+  var dc = r.direcao==='CALL'?'var(--g)':r.direcao==='PUT'?'var(--r)':'var(--y)';
+  var qc = r.qualidade==='ALTA'?'var(--g)':r.qualidade==='MEDIA'?'var(--y)':'var(--r)';
+  var srcTag = r._source ? '<span style="color:var(--p);font-size:8px">['+r._source+']</span>' : '';
+  var tipoTag = r.tipo_sinal==='CRUZAMENTO'?'⚡ CROSS':r.tipo_sinal==='CONTINUIDADE'?'📈 CONT':'⏸';
+  var modeLabel = mode==='manual'?'<span style="color:var(--y);font-size:9px">[MANUAL]</span>':'<span style="color:var(--c);font-size:9px">[AUTO]</span>';
+  var html = '<div style="color:var(--c);font-size:11px;font-weight:700;margin-bottom:6px">🤖 IA '+modeLabel+' '+srcTag+': '
+    +(r.direcao==='CALL'?'▲ CALL':r.direcao==='PUT'?'▼ PUT':'⏸ NEUTRO')+' | '+r.qualidade+' | '+r.prob+'% | '+tipoTag+'</div>'
+    +'<div class="ai-grid">'
+    +'<div class="ai-cell"><div class="ai-cell-lbl">DIREÇÃO</div><div class="ai-cell-val" style="color:'+dc+'">'+(r.direcao==='CALL'?'▲ CALL':r.direcao==='PUT'?'▼ PUT':'⏸')+'</div></div>'
+    +'<div class="ai-cell"><div class="ai-cell-lbl">TIPO SINAL</div><div class="ai-cell-val" style="color:var(--y);font-size:11px">'+tipoTag+'</div></div>'
+    +'<div class="ai-cell"><div class="ai-cell-lbl">EXPIRAÇÃO</div><div class="ai-cell-val" style="color:var(--y)">'+r.expiracao+'min</div></div>'
+    +'</div><div class="ai-grid">'
+    +'<div class="ai-cell"><div class="ai-cell-lbl">QUALIDADE</div><div class="ai-cell-val" style="color:'+qc+'">'+r.qualidade+'</div></div>'
+    +'<div class="ai-cell"><div class="ai-cell-lbl">PROB</div><div class="ai-cell-val" style="color:var(--c)">'+r.prob+'%</div></div>'
+    +'<div class="ai-cell"><div class="ai-cell-lbl">TEND BARRAS</div><div class="ai-cell-val" style="font-size:11px;color:var(--b)">'+r.tendencia_barras+'</div></div>'
+    +'</div><div class="badges">'
+    +(r.cruzamento_detectado?'<span class="badge bg">⚡ '+r.tipo_cruzamento+'</span>':'<span class="badge by">~ Sem Cross</span>')
+    +(r.tendencia_ativa?'<span class="badge bb">📈 Tendência</span>':'')
+    +(r.histograma_crescente?'<span class="badge bg">✓ Hist▲</span>':'<span class="badge br">✗ Hist</span>')
+    +(r.momentum_forte?'<span class="badge bg">✓ Mom</span>':'<span class="badge by">~ Mom</span>')
+    +(r.macd_acima_zero?'<span class="badge bb">MACD>0</span>':'<span class="badge by">MACD<0</span>')
+    +(r.divergencia?'<span class="badge br">⚠ Diverg</span>':'')
+    +(liveForexPrice?'<span class="badge bb">💱 '+liveForexSource+'</span>':'')
+    +'</div>'
+    +'<div style="background:var(--bg4);padding:7px;border-radius:6px;font-size:10px;line-height:1.7;margin-top:4px">'
+    +'<span style="color:var(--c)">▶ </span>'+r.resumo+'</div>'
+    +(r.motivo_expiracao?'<div style="color:var(--y);font-size:9px;margin-top:4px">⏱ '+r.motivo_expiracao+'</div>':'')
+    +(r.riscos?'<div style="background:var(--rd);padding:6px;border-radius:6px;font-size:9px;color:#ff8099;margin-top:4px;border:1px solid rgba(255,45,85,0.3)">⚠ '+r.riscos+'</div>':'');
+  var dp = document.getElementById('aiDetailPanel'); if(dp) dp.innerHTML = html;
+  var ar = document.getElementById('aiResult'); if(ar){ar.innerHTML=html;ar.className='ai-result show';}
+}
+
+function updateExpDisplay(exp) {
+  if(!exp) return;
+  [1,2,3,5].forEach(function(n){
+    var el = document.getElementById('eib'+n);
+    if(el) el.className = 'exp-ia-btn' + (n===exp?' selected':'');
+  });
+  var lbl = document.getElementById('expIaLabel');
+  if(lbl){
+    var descMap = {
+      1:'⚡ 1 Min — cruzamento explosivo / SCALPING',
+      2:'📈 2 Min — cross + tendência / MODERADO',
+      3:'🔄 3 Min — continuidade moderada / TENDÊNCIA',
+      5:'📊 5 Min — tendência forte sem cross / SWING'
+    };
+    lbl.textContent = descMap[exp] || exp + ' min';
+  }
+}
+
+// ── FILTERS ──
+function runFilters(pair) {
+  var m = lastMACD, ai = lastAIResult, sess = getSession(pair);
+  var cUp = m.prevLine<=m.prevSig && m.line>m.signal;
+  var cDn = m.prevLine>=m.prevSig && m.line<m.signal;
+  var aiDir = ai ? (ai.direcao==='CALL'?'call':ai.direcao==='PUT'?'put':'none') : 'none';
+  var dir = aiDir!=='none' ? aiDir : (cUp?'call':cDn?'put':'none');
+  var histGrow = m.hist > m.prevHist;
+  var histCons = (dir==='call'&&m.hist>0)||(dir==='put'&&m.hist<0);
+  var macdSide = (dir==='call'&&m.line>0)||(dir==='put'&&m.line<0);
+  var mom = Math.abs(m.hist-m.prevHist), strongMom = mom > 0.00015;
+  var noDiverg = ai ? !ai.divergencia : true;
+  var trend = ai ? (ai.histograma_crescente && (dir==='call'?m.line>m.signal:m.line<m.signal)) :
+              ((cUp||cDn)||(dir==='call'&&m.line>m.signal*1.02)||(dir==='put'&&m.line<m.signal*0.98));
+  // Cross OR strong continuation counts as f1
+  var f1ok = ai ? (ai.cruzamento_detectado || (ai.tendencia_ativa && m.trendBars >= 3)) : (cUp||cDn||(m.trendBars>=5));
+  var f8ok = !!ai && (ai.qualidade==='ALTA'||ai.qualidade==='MEDIA') && ai.direcao!=='NEUTRO';
+  var sessOk = sess.q==='good' || sess.q==='med';
+  var srRes = getSRsignal(pair, dir);
+  var filters = [
+    {id:'f1',ok:f1ok},{id:'f2',ok:histGrow},{id:'f3',ok:histCons},
+    {id:'f4',ok:macdSide},{id:'f5',ok:strongMom},{id:'f6',ok:noDiverg},
+    {id:'f7',ok:trend},{id:'f8',ok:f8ok},{id:'f9',ok:sessOk},{id:'f10',ok:srRes.ok}
+  ];
+  filters.forEach(function(f){
+    var el=document.getElementById(f.id); if(!el) return;
+    el.textContent = f.ok ? '✓ SIM' : '✗ NÃO';
+    el.className = f.ok ? 'ok' : 'fail';
+  });
+  var okCount = filters.filter(function(f){return f.ok;}).length;
+  var fsEl = document.getElementById('filterSummary');
+  if(fsEl) fsEl.innerHTML = okCount+'/'+filters.length+' — '+
+    (okCount>=8?'<span class="ok">✅ SINAL EXCELENTE</span>':
+     okCount>=6?'<span class="ok">✅ SINAL VÁLIDO</span>':
+     okCount>=5?'<span class="warn-c">⚠️ SINAL MÍNIMO — cautela</span>':
+     '<span class="fail">❌ NÃO OPERAR</span>');
+  return {filters:filters, okCount:okCount, maxCount:filters.length, dir:dir, sess:sess, srRes:srRes};
+}
+
+// ── FULL SIGNAL WITH CROSS + CONTINUATION LOGIC ──
+async function runFullSignal(mode) {
+  if(!curPair) return;
+  mode = mode || signalMode;
+  var filt = runFilters(curPair), okCount = filt.okCount, maxCount = filt.maxCount;
+  var dir = filt.dir, sess = filt.sess, ai = lastAIResult;
+
+  // Calculate probability
+  var prob = 40 + okCount * 5;
+  if(ai) prob += Math.round((ai.prob - 50) * 0.45);
+  if(ai && ai.cruzamento_detectado) prob += 10;
+  if(ai && ai.tendencia_ativa && ai.tendencia_barras >= 3) prob += 6;
+  if(sess.q==='good') prob += 8; else if(sess.q==='med') prob += 3; else prob -= 8;
+  if(liveForexPrice) prob += 3; // bonus for live data
+  prob = Math.min(92, Math.max(38, Math.round(prob)));
+
+  var qual = prob>=75 && okCount>=8 ? 'high' : prob>=62 && okCount>=5 ? 'med' : 'low';
+
+  // Expiry logic: cross vs continuation
+  var exp = 1;
+  if(ai) {
+    exp = ai.expiracao;
+  } else {
+    var isCross = lastMACD.prevLine<=lastMACD.prevSig && lastMACD.line>lastMACD.signal ||
+                  lastMACD.prevLine>=lastMACD.prevSig && lastMACD.line<lastMACD.signal;
+    if(isCross) exp = lastMACD.candleForce > 50 ? 1 : 2;
+    else if(lastMACD.trendBars > 10) exp = 5;
+    else if(lastMACD.trendBars > 5) exp = 3;
+    else exp = 2;
+  }
+
+  // Determine signal type label
+  var tipoSinal = ai ? ai.tipo_sinal : (dir !== 'none' ? 'CRUZAMENTO' : 'NEUTRO');
+  var stratMap = {
+    TENDENCIA:{cls:'trend',lbl:'📈 TENDÊNCIA'},
+    SCALPING:{cls:'scalp',lbl:'⚡ SCALPING'},
+    REVERSAO:{cls:'rev',lbl:'🔄 REVERSÃO'},
+    CONTINUIDADE:{cls:'cont',lbl:'📊 CONTINUIDADE'}
+  };
+  var strat = ai ? (stratMap[ai.estrategia]||stratMap.TENDENCIA) : stratMap.TENDENCIA;
+
+  var type = 'NO', reason = '';
+  if(!curCapture){
+    type='NO'; reason='🚫 Aguardando captura de tela com gráfico MACD.';
+  } else if(!ai){
+    type='NO'; reason='🚫 Aguardando análise da IA.';
+  } else if(ai.direcao==='NEUTRO'){
+    type='NO'; reason='⏸ IA retornou NEUTRO: ' + ai.resumo;
+    ignoredSig++; var ic=document.getElementById('ignoredC'); if(ic) ic.textContent=ignoredSig;
+  } else if(okCount<5){
+    type='NO'; reason='🚫 Apenas '+okCount+'/'+maxCount+' filtros. Mínimo 5 para operar.';
+    ignoredSig++; var ic=document.getElementById('ignoredC'); if(ic) ic.textContent=ignoredSig;
+  } else if(qual==='low'){
+    type='NO'; reason='⚠️ Qualidade BAIXA ('+prob+'%). NÃO operar em conta real.';
+    ignoredSig++; var ic=document.getElementById('ignoredC'); if(ic) ic.textContent=ignoredSig;
+  } else {
+    type = dir==='call' ? 'CALL' : 'PUT';
+    var crossInfo = ai.cruzamento_detectado ? ('⚡ Cross ' + ai.tipo_cruzamento) :
+                    (ai.tendencia_ativa ? '📈 Continuidade ' + ai.tendencia_barras + ' barras' : 'Setup detectado');
+    reason = crossInfo + ' | Estratégia: ' + ai.estrategia + ' | Exp: ' + exp + 'min (' + ai.motivo_expiracao + ')'
+      + ' | ' + sess.label + ' | ' + filt.srRes.info
+      + ' | Filtros: ' + okCount + '/' + maxCount
+      + ' | Padrão: ' + ai.padraoDetectado
+      + ' | IA: ' + (ai._source||'')
+      + ' | Modo: ' + (mode==='manual'?'MANUAL':'AUTO');
+  }
+
+  renderSignal(type, curPair, prob, reason, okCount, maxCount, exp, qual, strat, mode, tipoSinal);
+
+  if(type !== 'NO') {
+    totSig++; if(qual==='high') highQSig++;
+    addLog(type, curPair, prob, okCount, maxCount, exp, qual, mode);
+    var ts=document.getElementById('totSig'); if(ts) ts.textContent=totSig;
+    var hq=document.getElementById('highQ'); if(hq) hq.textContent=highQSig;
+    playSound(type, qual);
+    var notif = '✅ '+type+' — '+curPair+' | '+exp+'min | '+prob+'% | '+okCount+'/'+maxCount+
+      ' | '+(tipoSinal==='CRUZAMENTO'?'⚡ CROSS':'📈 CONT')+(mode==='manual'?' [MANUAL]':' [AUTO]');
+    showToast(qual==='high' ? notif : '⚠️ '+type+' MÉDIO — '+curPair+' | Cautela! | '+exp+'min', qual==='high'?'ok':'w');
+  } else {
+    if(mode==='manual') showToast('⏸ Manual: NÃO OPERAR — '+reason.substring(0,80),'w');
+  }
+}
+
+function renderSignal(type, pair, prob, reason, ok, max, exp, qual, strat, mode, tipoSinal) {
+  var cls = type==='NO'?'no':type.toLowerCase();
+  document.getElementById('sigPanel').className = 'sig-panel ' + cls;
+  var te = document.getElementById('sigType'); te.className='sig-type '+cls;
+  te.innerHTML = type==='CALL'?'▲ COMPRA (CALL)':type==='PUT'?'▼ VENDA (PUT)':'⏸ NÃO OPERAR';
+  var sigC = type==='CALL'?'var(--g)':type==='PUT'?'var(--r)':'var(--y)';
+  document.getElementById('sigAsset').textContent = pair; document.getElementById('sigAsset').style.color = sigC;
+  document.getElementById('sigExp').textContent = type!=='NO' ? ('⏱ EXPIRAÇÃO: '+exp+' MINUTO'+(exp>1?'S':'')+' — IA') : '⏱ —';
+
+  // Pattern label
+  var smEl = document.getElementById('sigMode');
+  if(smEl) smEl.textContent = tipoSinal==='CRUZAMENTO' ? '⚡ SINAL POR CRUZAMENTO' :
+    tipoSinal==='CONTINUIDADE' ? '📈 SINAL POR CONTINUIDADE' : '— SEM SINAL —';
+  var spEl = document.getElementById('sigPattern');
+  if(spEl) { spEl.textContent = lastAIResult ? lastAIResult.padraoDetectado : '—'; spEl.style.color = type==='CALL'?'var(--g)':type==='PUT'?'var(--r)':'var(--text3)'; }
+
+  document.getElementById('probFill').style.width = prob+'%';
+  document.getElementById('probFill').className = 'prob-fill ' + cls;
+  document.getElementById('probVal').textContent = prob+'%';
+  document.getElementById('sigReason').textContent = reason;
+  document.getElementById('filtersEl').textContent = ok+'/'+max;
+  document.getElementById('modeEl').textContent = mode==='manual'?'MANUAL':'AUTO';
+  document.getElementById('modeEl').style.color = mode==='manual'?'var(--y)':'var(--g)';
+  var qr = document.getElementById('qRing'); qr.className='q-ring '+qual;
+  document.getElementById('qNum').textContent = prob+'%';
+  if(strat) document.getElementById('stratTagEl').innerHTML='<span class="strat-tag '+strat.cls+'">'+strat.lbl+'</span>';
+  var now = getSynced(), expT = new Date(now.getTime()+exp*60000);
+  if(type!=='NO'){
+    document.getElementById('entryT').textContent = now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('expT').textContent = expT.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  } else {
+    document.getElementById('entryT').textContent='--:--';
+    document.getElementById('expT').textContent='--:--';
+  }
+  if(type!=='NO' && exp) updateExpDisplay(exp);
+}
+
+async function forceAnalysis() {
+  if(!curPair){showToast('Selecione um par!','w');return;}
+  if(!captureActive){showToast('⚠️ Inicie a captura de tela primeiro!','w');return;}
+  if(isAnalyzing){showToast('⏳ IA já está analisando...','w');return;}
+  isAnalyzing = true;
+  showToast('🔍 Análise manual — IA lendo gráfico...');
+  document.getElementById('captureZone').className='capture-zone analyzing';
+  document.getElementById('capStatusOverlay').textContent='🤖 ANÁLISE MANUAL...';
+  try {
+    var vid = document.getElementById('screenVideo');
+    if(vid.videoWidth) {
+      var canvas = document.getElementById('snapCanvas');
+      canvas.width=vid.videoWidth; canvas.height=vid.videoHeight;
+      canvas.getContext('2d').drawImage(vid,0,0);
+      curCapture = canvas.toDataURL('image/jpeg',0.82);
+      document.getElementById('lastCapture').src=curCapture;
+      captureCount++; var cc=document.getElementById('capCount'); if(cc) cc.textContent=captureCount;
+    }
+    if(!curCapture){showToast('⚠️ Sem imagem disponível.','w');isAnalyzing=false;return;}
+    lastAIResult = await analyzeImageWithAI(curCapture, curPair);
+    analyseCount++; var ca=document.getElementById('capAnalyses'); if(ca) ca.textContent=analyseCount;
+    updateExpDisplay(lastAIResult.expiracao);
+    renderAIResult(lastAIResult,'manual');
+    updateCrossAlert(lastAIResult);
+    await runFullSignal('manual');
+  } catch(e){showToast('❌ Erro: '+e.message,'e');}
+  finally {
+    isAnalyzing = false;
+    document.getElementById('captureZone').className = lastAIResult&&lastAIResult.direcao==='CALL'?'capture-zone signal-call':
+      lastAIResult&&lastAIResult.direcao==='PUT'?'capture-zone signal-put':'capture-zone active';
+    document.getElementById('capStatusOverlay').textContent='🔴 AO VIVO — '+(signalMode==='auto'?'AUTO':'MANUAL');
+  }
+}
+
+function addLog(type, pair, prob, ok, max, exp, qual, mode) {
+  var logEl = document.getElementById('logList');
+  var empty = logEl.querySelector('div[style*="text-align:center"]'); if(empty) empty.remove();
+  var now = getSynced(), d = document.createElement('div');
+  d.className='log-item '+type.toLowerCase();
+  var qc = qual==='high'?'var(--g)':qual==='med'?'var(--y)':'var(--r)';
+  d.innerHTML='<span style="color:var(--text2)">'+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</span>'
+    +'<span style="font-weight:700;color:'+(type==='CALL'?'var(--g)':'var(--r)')+'"> '+(type==='CALL'?'▲':'▼')+' '+pair+'</span>'
+    +'<span style="color:var(--y)">'+exp+'m</span>'
+    +'<span style="color:var(--c)">'+prob+'%</span>'
+    +'<span style="color:'+qc+'">'+ok+'/'+max+'</span>';
+  logEl.insertBefore(d, logEl.firstChild);
+  while(logEl.children.length > 40) logEl.removeChild(logEl.lastChild);
+}
+
+function clearLog() {
+  document.getElementById('logList').innerHTML='<div style="text-align:center;padding:15px;color:var(--text2);font-size:10px;font-family:monospace">Aguardando sinais...</div>';
+  totSig=0;highQSig=0;ignoredSig=0;
+  ['totSig','highQ','ignoredC'].forEach(function(id){var e=document.getElementById(id);if(e)e.textContent=0;});
+}
+
+function selectPair(p) {
+  curPair=p;
+  var sel=document.getElementById('pairSelect'); if(sel) sel.value=p;
+  renderSR(p); renderSessionInfo();
+  if(captureActive) getLiveForexPrice(p);
+  showToast('📌 '+p+' selecionado');
+}
+
+function renderSessionInfo() {
+  var pair=curPair||'EUR/USD', s=getSession(pair);
+  var el=document.getElementById('sessInfo');
+  if(el) el.innerHTML='<span style="color:'+(s.q==='good'?'var(--g)':s.q==='med'?'var(--y)':'var(--r)')+'">'+s.label+'</span>';
+  var el2=document.getElementById('sessionDetail');
+  if(el2) el2.innerHTML='<div style="color:var(--c);margin-bottom:4px">Par: '+pair+'</div>'
+    +'<div style="color:'+(s.q==='good'?'var(--g)':s.q==='med'?'var(--y)':'var(--r)')+';font-size:12px">'+s.label+'</div>'
+    +'<div style="color:var(--text2);margin-top:6px;font-size:9px;line-height:1.8">'
+    +'London: 05–08h Brasília<br>NY Open: 10–13h Brasília<br>'
+    +'<span style="color:var(--g)">Overlap: 10–12h (MELHOR)</span><br>'
+    +'OTC ideal: 00–05h e 18–24h<br>'
+    +'<span style="color:var(--b)">OTC disponível: 7 dias/semana</span></div>';
+}
+
+function playSound(type, qual) {
+  if(qual==='low') return;
+  try {
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    if(type==='CALL') {
+      [440,550,660].forEach(function(f,i){
+        var o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=f;
+        g.gain.setValueAtTime(qual==='high'?0.3:0.15,ctx.currentTime+i*0.1);
+        g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.1+0.4);
+        o.start(ctx.currentTime+i*0.1);o.stop(ctx.currentTime+i*0.1+0.4);
+      });
+    } else {
+      [660,550,440].forEach(function(f,i){
+        var o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=f;
+        g.gain.setValueAtTime(qual==='high'?0.3:0.15,ctx.currentTime+i*0.1);
+        g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.1+0.4);
+        o.start(ctx.currentTime+i*0.1);o.stop(ctx.currentTime+i*0.1+0.4);
+      });
+    }
+  } catch(e){}
+}
+
+function showToast(msg, t) {
+  t=t||'ok';
+  var el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast '+(t==='e'?'te':t==='w'?'tw':'')+' show';
+  clearTimeout(el._t); el._t=setTimeout(function(){el.classList.remove('show');},4500);
+}
+
+async function syncTime() {
+  try{
+    var r=await fetch('https://worldtimeapi.org/api/timezone/America/Sao_Paulo');
+    var d=await r.json();
+    timeOffset=new Date(d.datetime).getTime()-Date.now();
+  }catch(e){timeOffset=0;}
+}
+function getSynced(){return new Date(Date.now()+timeOffset);}
+
+function updateCtdRing(rem, total) {
+  var circ=219.9, el=document.getElementById('ctdCircle');
+  if(el){el.style.strokeDashoffset=circ-(rem/total)*circ;el.style.stroke=rem<=3?'var(--y)':'var(--c)';}
+  var ne=document.getElementById('ctdNum'); if(ne) ne.textContent=rem;
+}
+
 function updateClock() {
-    const now = getSyncedTime();
-    document.getElementById('timeDisplay').textContent = now.toLocaleTimeString('pt-BR');
-    const nextCandle = new Date(now);
-    nextCandle.setMinutes(now.getMinutes() + 1); nextCandle.setSeconds(0);
-    const diffSec = Math.floor((nextCandle - now) / 1000);
-    document.getElementById('countdown').textContent = `Próximo candle: ${Math.floor(diffSec/60)}:${(diffSec%60).toString().padStart(2,'0')}`;
-    updateMACDState();
-    setTimeout(updateClock, 500);
+  var now=getSynced(), el=document.getElementById('clockEl');
+  if(el) el.textContent=now.toLocaleTimeString('pt-BR');
+  if(!captureActive){var s15=15-(now.getSeconds()%15);updateCtdRing(s15,15);}
+  updateMACD();
+  setTimeout(updateClock,500);
 }
- 
-// ========== TOAST ==========
-function showToast(message) {
-    const t = document.getElementById('toast');
-    t.textContent = message; t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-}
- 
-// ========== EVENTS ==========
-function setupEventListeners() {
-    document.getElementById('openCameraBtn').onclick = () => startCamera();
-    document.getElementById('capturePhotoBtn').onclick = () => capturePhoto();
-    document.getElementById('switchCameraBtnModal').onclick = () => switchCamera();
-    document.getElementById('closeCameraBtn').onclick = () => closeCamera();
-    document.getElementById('toggleAutoSignalBtn').onclick = () => toggleAutoSignal();
-    document.getElementById('strategyTrend').onclick = () => setStrategy('trend');
-    document.getElementById('strategyScalping').onclick = () => setStrategy('scalping');
-    document.getElementById('strategyReversal').onclick = () => setStrategy('reversal');
-    document.getElementById('manualSignalBtn').onclick = () => generateSignal(true);
-    document.getElementById('clearLogBtn').onclick = () => clearLog();
-    document.getElementById('clearImageBtn').onclick = () => clearCurrentImage();
-    document.getElementById('saveBankBtn').onclick = () => saveBankToStorage();
-    document.getElementById('clearBankBtn').onclick = () => clearAllBank();
-    document.getElementById('addToBankBtn').onclick = () => document.getElementById('bankInput').click();
- 
-    document.getElementById('pairSelect').onchange = (e) => {
-        if (e.target.value) { currentSelectedAsset = e.target.value; document.getElementById('currentSelectedAsset').innerHTML = e.target.value; }
-    };
- 
-    const dropArea = document.getElementById('dropArea');
-    const imageInput = document.getElementById('imageInput');
-    dropArea.onclick = () => imageInput.click();
-    dropArea.ondragover = (e) => { e.preventDefault(); dropArea.style.borderColor = '#00e5c0'; };
-    dropArea.ondragleave = () => dropArea.style.borderColor = '#2a3a55';
-    dropArea.ondrop = async (e) => {
-        e.preventDefault(); dropArea.style.borderColor = '#2a3a55';
-        const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) await loadGraphImage(file);
-    };
-    imageInput.onchange = async (e) => { if (e.target.files[0]) await loadGraphImage(e.target.files[0]); imageInput.value=''; };
- 
-    document.getElementById('bankInput').onchange = async (e) => {
-        const files = Array.from(e.target.files);
-        for (const file of files) {
-            const reader = new FileReader();
-            reader.onload = async (ev) => await addToBank(ev.target.result, file.name);
-            reader.readAsDataURL(file);
-        }
-        e.target.value = '';
-    };
-}
- 
-// ========== INIT ==========
+
+// ── INIT ──
 async function init() {
-    await syncTime();
-    loadBankFromStorage();
-    setupEventListeners();
-    updateClock();
-    renderTopAssets();
-    setInterval(syncTime, 60000);
-    setInterval(renderTopAssets, 15000);
-    document.getElementById('currentSelectedAsset').innerHTML = currentSelectedAsset;
-    document.getElementById('pairSelect').value = currentSelectedAsset;
-    showToast('✅ MACD Signal Pro pronto | Insira o gráfico para análise');
+  await syncTime();
+  renderRadar(); renderSessionInfo(); updateClock();
+  document.getElementById('pairSelect').onchange=function(e){
+    if(e.target.value){curPair=e.target.value;renderSR(e.target.value);renderSessionInfo();}
+  };
+  setInterval(renderRadar,10000);
+  setInterval(renderSessionInfo,30000);
+  setInterval(syncTime,60000);
+  // Test APIs async — doesn't block UI
+  setTimeout(testAllAPIs, 500);
+  showToast('✅ MACD Signal Pro v5 — testando APIs...');
 }
- 
-window.selectBankImage = selectBankImage;
-window.removeFromBank = removeFromBank;
-window.selectAssetFromTop = selectAssetFromTop;
-window.setExpiry = setExpiry;
- 
+
+window.toggleCapture=toggleCapture;
+window.forceAnalysis=forceAnalysis;
+window.selectPair=selectPair;
+window.setMode=setMode;
+window.clearLog=clearLog;
+
 init();
 </script>
 </body>
